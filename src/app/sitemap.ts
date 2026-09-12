@@ -56,12 +56,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 1,
       alternates: { languages: languageAlternates('/') },
     },
-    {
-      url: absoluteUrl('/privacy'),
-      changeFrequency: 'yearly',
+    ...(['/privacy', '/imprint', '/accessibility'] as const).map((path) => ({
+      url: absoluteUrl(path),
+      changeFrequency: 'yearly' as const,
       priority: 0.3,
-      alternates: { languages: languageAlternates('/privacy') },
-    },
+      alternates: { languages: languageAlternates(path) },
+    })),
   ];
 
   const schoolEntries: MetadataRoute.Sitemap = schools.map((school) => ({

@@ -11,16 +11,31 @@ no cookies and make no third-party requests.
 ## Setup
 
 ```bash
-npm i -D playwright-core      # or use the browser already on your machine
-export CHROME_PATH=/path/to/chrome     # e.g. /opt/pw-browsers/chromium-*/chrome-linux/chrome
+npm i -D playwright-core axe-core       # axe-core is only needed by a11y.mjs
+export CHROME_PATH=/path/to/chrome      # e.g. /opt/pw-browsers/chromium-*/chrome-linux/chrome
 export BASE_URL=http://localhost:3101
 
-# Terminal 1 - dev server with magic links printed to the console
-AUTH_DEV_LOG_MAGIC_LINK=true PORT=3101 npm run dev
+# Terminal 1 - dev server. A production server will not do for the admin
+# scripts: its session cookie is Secure and will not survive plain http://.
+PORT=3101 npm run dev
 
 # Terminal 2
 npm run db:seed
 ```
+
+## Getting a staff session
+
+```bash
+export AUTH_SECRET=...        # same value the server is running with
+SESSION=$(node e2e/get-session.mjs sekretariat@example.org)
+```
+
+`get-session.mjs` seeds a verification token whose preimage it knows and then
+redeems it like a real magic link. It deliberately does **not** read the token
+out of the database: Auth.js stores `sha256(token + AUTH_SECRET)`, so the stored
+value cannot be replayed. This needs no dev-only flag, no SMTP server and no
+test hook in the production auth code, which is what makes it safe to use from
+CI as well.
 
 ## `public.mjs` - parent journey, no sign-in
 
@@ -35,16 +50,37 @@ download, and that the cookie jar stays empty throughout.
 
 ## `admin.mjs` - staff journey
 
-Obtain a session cookie first: request a link, read the URL from the dev server
-console, open it, and take the `schulkompass.session` cookie value.
-
 ```bash
-node e2e/admin.mjs "<session-cookie-value>"
+node e2e/admin.mjs "$SESSION"
 ```
 
 Checks: profile save, server-side validation errors rendered on the right field,
 event create, the end-before-start rule, navigation to the edit page, event update,
 and the audit trail on the dashboard.
+
+## `a11y.mjs` - WCAG 2.1 A/AA audit
+
+```bash
+node e2e/a11y.mjs "<school-id>" "$SESSION"     # the session argument is optional
+```
+
+Runs axe-core against every public page in all five locales, the interactive
+states automation usually misses (activated map, server-side validation errors)
+and - when given a session - the admin pages. Prints one line per rule with the
+affected page states. Distinct from `tests/contrast.test.ts`, which guards the
+design tokens' contrast ratios without needing a browser.
+
+## `a11y-manual.mjs` - the criteria axe cannot test
+
+```bash
+node e2e/a11y-manual.mjs "<school-id>"
+```
+
+Checks reflow at 320 px (WCAG 1.4.10), text enlargement to 200 % (1.4.4),
+keyboard-only operation including the skip link and focus visibility (2.1.1,
+2.4.1, 2.4.7), and heading/landmark structure. Automated rules catch a minority
+of accessibility problems; a screen-reader pass with real users is still
+outstanding and is declared as such in the accessibility statement.
 
 ## What to expect
 

@@ -23,7 +23,9 @@
     "signIn": "Giriş yap",
     "signOut": "Çıkış yap",
     "privacy": "Veri koruma",
-    "skipToContent": "İçeriğe geç"
+    "skipToContent": "İçeriğe geç",
+    "imprint": "Künye",
+    "accessibility": "Erişilebilirlik"
   },
   "locale": {
     "label": "Dil",
@@ -219,10 +221,73 @@
     "mapTitle": "Haritalar",
     "mapBody": "Harita döşemeleri yalnızca açık onayınızdan sonra OpenStreetMap'ten yüklenir.",
     "hostingTitle": "Sunucu konumu",
-    "hostingBody": "Uygulama ve veritabanı Avrupa Birliği'nde (Frankfurt bölgesi) çalışır."
+    "hostingBody": "Uygulama ve veritabanı Avrupa Birliği'nde (Frankfurt bölgesi) çalışır.",
+    "legal": {
+      "heading": "Yasal zorunlu bilgiler",
+      "controllerHeading": "Veri sorumlusu",
+      "controllerBody": "GDPR md. 4 (7) anlamında veri sorumlusu, künyede belirtilen hizmet sağlayıcıdır.",
+      "dpoHeading": "Veri koruma görevlisi",
+      "purposesHeading": "Amaçlar ve hukuki dayanaklar",
+      "purposeSearchTitle": "Okul arama (hesap gerekmez)",
+      "purposeSearchBody": "Arama işlevi velilere ait hiçbir kişisel veriyi toplamaz veya saklamaz. Bir sorgu yalnızca yanıtlanması amacıyla işlenir. Hizmetin işletilmesinin hukuki dayanağı, kamuya açık okul bilgilerini sunma göreviyle bağlantılı olarak GDPR md. 6 (1) (e)’dir.",
+      "purposeStaffTitle": "Okul personeli erişimi",
+      "purposeStaffBody": "Okul sekreterliklerinin girişi için kurumsal e-posta adresi, rol, okul ve giriş zamanları işlenir. Hukuki dayanak GDPR md. 6 (1) (e)’dir; işleme bu görevin yerine getirilmesi için gereklidir.",
+      "purposeAuditTitle": "Değişiklik kaydı",
+      "purposeAuditBody": "Okul ve tarih verilerindeki her değişiklik, zaman damgası ve işlemi yapan e-posta adresiyle kaydedilir; böylece yayınlanan bilgiler hesap verebilir kalır. Hukuki dayanak GDPR md. 6 (1) (e)’dir.",
+      "recipientsHeading": "Alıcılar ve veri işleyenler",
+      "recipientsBody": "Bir barındırma sağlayıcısı ve giriş bağlantılarının gönderimi için bir e-posta sağlayıcısı kullanılır; her ikisi de GDPR md. 28 uyarınca veri işleme sözleşmesi kapsamındadır. Üçüncü ülkelere aktarım yapılmaz. Harita döşemeleri yalnızca açık onayınızdan sonra OpenStreetMap Foundation’dan yüklenir; bu durumda IP adresiniz bu kuruluşa iletilir.",
+      "retentionHeading": "Saklama süresi",
+      "retentionBody": "Giriş bağlantıları 15 dakika sonra geçersiz olur ve kullanıldıktan sonra silinir. Okul personeli hesapları, erişime artık ihtiyaç kalmadığında silinir veya devre dışı bırakılır. Değişiklik kaydı girişleri, hizmet sağlayıcının saklama kurallarına göre tutulur.",
+      "rightsHeading": "Haklarınız",
+      "rightsBody": "Bilgi edinme (GDPR md. 15), düzeltme (md. 16), silme (md. 17), işlemenin kısıtlanması (md. 18), veri taşınabilirliği (md. 20) ve itiraz (md. 21) haklarına sahipsiniz. Bunun için yukarıda belirtilen veri koruma görevlisine başvurun.",
+      "complaintHeading": "Şikâyet hakkı",
+      "complaintBody": "Bir veri koruma denetim kurumuna şikâyette bulunabilirsiniz; bu uygulama için özellikle: {authority} ({url}).",
+      "automatedHeading": "Otomatik karar verme yoktur",
+      "automatedBody": "Otomatik karar verme ve profil oluşturma yapılmaz. Arama sonuçları yalnızca mesafeye ve seçtiğiniz filtrelere göre sıralanır.",
+      "authoritativeLanguage": "Bu sayfanın hukuken bağlayıcı olan sürümü Almanca sürümüdür."
+    }
   },
   "footer": {
     "openData": "Okul verileri Kuzey Ren-Vestfalya eyaletinin açık verilerine dayanır.",
     "forSchools": "Okullar için"
+  },
+  "imprint": {
+    "title": "Künye",
+    "providerHeading": "Hizmet sağlayıcı",
+    "legalForm": "Hukuki şekli",
+    "representedBy": "Temsil eden",
+    "addressHeading": "Adres",
+    "contactHeading": "İletişim",
+    "phone": "Telefon",
+    "email": "E-posta",
+    "registerHeading": "Sicil kaydı",
+    "registerCourt": "Sicil mahkemesi",
+    "registerNumber": "Sicil numarası",
+    "vatIdHeading": "KDV kimlik numarası",
+    "contentResponsibleHeading": "MStV § 18 (2) uyarınca içerikten sorumlu kişi",
+    "supervisoryAuthorityHeading": "Denetim kurumu",
+    "schoolContentNote": "Okullara ve tarihlerine ilişkin bilgiler okulların kendileri tarafından güncellenir. Bu içeriklerden ilgili okullar sorumludur.",
+    "authoritativeLanguage": "Bu sayfanın hukuken bağlayıcı olan sürümü Almanca sürümüdür.",
+    "notConfiguredTitle": "Künye henüz girilmedi",
+    "notConfiguredBody": "Bu kurulumda hizmet sağlayıcı bilgileri henüz girilmemiştir. Almanya’da künye yasal bir zorunluluktur (§ 5 DDG): Bu uygulama herkese açık hale gelmeden önce lütfen src/config/operator.ts dosyasını doldurun."
+  },
+  "accessibility": {
+    "title": "Erişilebilirlik beyanı",
+    "intro": "Hizmet sağlayıcı, bu uygulamayı erişilebilir kılmaya özen gösterir. Bu beyan {url} adresi için geçerlidir.",
+    "statusHeading": "Gerekliliklere uygunluk durumu",
+    "statusBody": "Bu uygulama WCAG 2.1 AA uygunluk düzeyiyle büyük ölçüde uyumludur. Aşağıda belirtilen noktalar henüz nihai olarak denetlenmemiştir.",
+    "testedHeading": "Bu beyanın hazırlanması",
+    "testedBody": "Bu beyan {date} tarihinde bir öz değerlendirmeye dayanılarak hazırlanmıştır. Tüm herkese açık sayfalar beş dil sürümünde ve okullara ait giriş alanı denetlenmiştir: WCAG 2.1 A ve AA ölçütlerine karşı axe-core ile otomatik olarak, ayrıca klavyeyle kullanım, 320 piksel genişlikte görünüm, metnin yüzde 200 büyütülmesi, renk kontrastı ve belge yapısı elle kontrol edilmiştir.",
+    "limitationsHeading": "Erişilebilir olmayan içerikler",
+    "limitationsMapTitle": "Harita görünümü",
+    "limitationsMapBody": "Harita, üçüncü taraf bir kütüphane (Leaflet) ile gösterilir. Harita işaretlerine klavyeyle erişilebilir ve adlandırılmıştır; ancak haritanın ekran okuyucularla kullanımının tam denetimi henüz yapılmamıştır. Haritadaki tüm bilgiler liste hâlinde ve okul sayfalarında metin olarak da mevcuttur; ayrıca harita yalnızca açık onaydan sonra yüklenir.",
+    "limitationsSchoolTextTitle": "Okulların girdiği metinler",
+    "limitationsSchoolTextBody": "Açıklamalar ve bilgi notları okullar tarafından girilir. Hizmet sağlayıcının bu metinlerin anlaşılırlığı ve yapısı üzerinde doğrudan etkisi yoktur.",
+    "limitationsScreenReaderTitle": "Ekran okuyucu denetimi",
+    "limitationsScreenReaderBody": "Ekran okuyucularla (örneğin NVDA, JAWS, VoiceOver) ve engelli kullanıcılarla kapsamlı bir denetim henüz gerçekleştirilmemiştir.",
+    "feedbackHeading": "Engelleri bildirme",
+    "feedbackBody": "Bir engelle karşılaştınız veya bilgilere erişilebilir bir biçimde mi ihtiyaç duyuyorsunuz? {email} adresinden bize bildirin. En kısa sürede yanıt vereceğiz.",
+    "enforcementHeading": "Uzlaştırma usulü",
+    "enforcementBody": "Bildiriminize tatmin edici bir yanıt alamazsanız {body} kurumuna başvurabilirsiniz: {url}."
   }
 }

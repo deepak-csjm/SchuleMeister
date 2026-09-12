@@ -23,7 +23,9 @@
     "signIn": "Sign in",
     "signOut": "Sign out",
     "privacy": "Privacy",
-    "skipToContent": "Skip to content"
+    "skipToContent": "Skip to content",
+    "imprint": "Imprint",
+    "accessibility": "Accessibility"
   },
   "locale": {
     "label": "Language",
@@ -219,10 +221,73 @@
     "mapTitle": "Maps",
     "mapBody": "Map tiles are loaded from OpenStreetMap only after your explicit confirmation.",
     "hostingTitle": "Server location",
-    "hostingBody": "Application and database run in the European Union (Frankfurt region)."
+    "hostingBody": "Application and database run in the European Union (Frankfurt region).",
+    "legal": {
+      "heading": "Mandatory legal information",
+      "controllerHeading": "Controller",
+      "controllerBody": "The controller within the meaning of Art. 4 (7) GDPR is the provider named in the imprint.",
+      "dpoHeading": "Data protection officer",
+      "purposesHeading": "Purposes and legal bases",
+      "purposeSearchTitle": "School search (no account)",
+      "purposeSearchBody": "The search collects and stores no personal data about parents. A query is processed only in order to answer it. The legal basis for operating the service is Art. 6 (1) (e) GDPR, in connection with the task of publishing public school information.",
+      "purposeStaffTitle": "Access for school staff",
+      "purposeStaffBody": "For school office sign-in we process the official email address, the role, the school and sign-in timestamps. The legal basis is Art. 6 (1) (e) GDPR; the processing is necessary to perform that task.",
+      "purposeAuditTitle": "Change log",
+      "purposeAuditBody": "Every change to school and event data is logged with a timestamp and the acting email address so that published information stays accountable. The legal basis is Art. 6 (1) (e) GDPR.",
+      "recipientsHeading": "Recipients and processors",
+      "recipientsBody": "We use a hosting provider and an email provider for delivering sign-in links, each under a data processing agreement pursuant to Art. 28 GDPR. No transfer to third countries takes place. Map tiles are loaded from the OpenStreetMap Foundation only after your explicit confirmation; your IP address is transmitted to them in that case.",
+      "retentionHeading": "Retention",
+      "retentionBody": "Sign-in links expire after 15 minutes and are deleted once used. School staff accounts are deleted or deactivated when access is no longer needed. Change-log entries are retained according to the provider’s retention rules.",
+      "rightsHeading": "Your rights",
+      "rightsBody": "You have the right of access (Art. 15 GDPR), rectification (Art. 16), erasure (Art. 17), restriction of processing (Art. 18), data portability (Art. 20) and objection (Art. 21). Please contact the data protection officer named above.",
+      "complaintHeading": "Right to lodge a complaint",
+      "complaintBody": "You may lodge a complaint with a data protection supervisory authority, for this application in particular: {authority} ({url}).",
+      "automatedHeading": "No automated decision-making",
+      "automatedBody": "There is no automated decision-making and no profiling. Search results are ordered solely by distance and by the filters you select.",
+      "authoritativeLanguage": "The German version of this page is the legally binding one."
+    }
   },
   "footer": {
     "openData": "School data is based on open data published by the state of North Rhine-Westphalia.",
     "forSchools": "For schools"
+  },
+  "imprint": {
+    "title": "Imprint",
+    "providerHeading": "Provider",
+    "legalForm": "Legal form",
+    "representedBy": "Represented by",
+    "addressHeading": "Address",
+    "contactHeading": "Contact",
+    "phone": "Phone",
+    "email": "Email",
+    "registerHeading": "Register entry",
+    "registerCourt": "Registering court",
+    "registerNumber": "Register number",
+    "vatIdHeading": "VAT identification number",
+    "contentResponsibleHeading": "Responsible for editorial content under § 18 (2) MStV",
+    "supervisoryAuthorityHeading": "Supervisory authority",
+    "schoolContentNote": "The details of individual schools and their dates are maintained by the schools themselves. Each school is responsible for its own content.",
+    "authoritativeLanguage": "The German version of this page is the legally binding one.",
+    "notConfiguredTitle": "Imprint not configured yet",
+    "notConfiguredBody": "The provider details have not been filled in for this installation. An imprint is required by law in Germany (§ 5 DDG): please complete src/config/operator.ts before this application becomes publicly reachable."
+  },
+  "accessibility": {
+    "title": "Accessibility statement",
+    "intro": "The provider is committed to making this application accessible. This statement applies to {url}.",
+    "statusHeading": "Compliance status",
+    "statusBody": "This application is largely compliant with WCAG 2.1 at conformance level AA. The items listed below have not yet been conclusively assessed.",
+    "testedHeading": "Preparation of this statement",
+    "testedBody": "This statement was prepared on {date} on the basis of a self-assessment. All public pages in all five languages and the school sign-in area were tested: automatically with axe-core against WCAG 2.1 A and AA, supplemented by manual checks of keyboard operation, rendering at 320 pixels wide, text enlargement to 200 percent, colour contrast and document structure.",
+    "limitationsHeading": "Non-accessible content",
+    "limitationsMapTitle": "Map view",
+    "limitationsMapBody": "The map is rendered with a third-party library (Leaflet). Map markers are keyboard reachable and named, but a full assessment of map interaction with screen readers is still outstanding. All information on the map is also available as a list and in text form on the school pages, and the map is only loaded after explicit confirmation.",
+    "limitationsSchoolTextTitle": "Text entered by schools",
+    "limitationsSchoolTextBody": "Descriptions and notes are entered by the schools themselves. The provider has no direct influence on the clarity and structure of those texts.",
+    "limitationsScreenReaderTitle": "Screen reader assessment",
+    "limitationsScreenReaderBody": "A full assessment with screen readers (such as NVDA, JAWS, VoiceOver) and with users with disabilities has not yet taken place.",
+    "feedbackHeading": "Reporting barriers",
+    "feedbackBody": "Have you encountered barriers, or do you need information in an accessible format? Contact us at {email}. We will respond as quickly as we can.",
+    "enforcementHeading": "Enforcement procedure",
+    "enforcementBody": "If you do not receive a satisfactory response to your report, you can contact the {body}: {url}."
   }
 }

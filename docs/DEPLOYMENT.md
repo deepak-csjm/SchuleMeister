@@ -1,5 +1,30 @@
 # Deployment
 
+## Pre-launch checklist
+
+Beyond the technical setup below, these must be done before the site is publicly
+reachable:
+
+1. **Fill in `src/config/operator.ts`** - legal name, address, contact, person
+   responsible for content, data protection officer, accessibility contact.
+   `npm run check:legal` fails while placeholders remain, and `/imprint` shows a
+   visible notice rather than a half-finished Impressum. An Impressum is required
+   by § 5 DDG.
+2. **Have `/imprint` and `/privacy` reviewed** by whoever is accountable for data
+   protection. The privacy page states legal bases (Art. 6 (1) (e) GDPR) that
+   assume a public-body operator - if the operator is a private entity, those
+   bases are wrong and must change.
+3. **Set `SITE_URL`** to the public origin, or canonical URLs, hreflang and the
+   sitemap will point at the wrong host.
+4. **Import real school data** and verify the column mapping - see
+   [OPEN_DATA.md](OPEN_DATA.md). The default seed is synthetic demo data and must
+   never be published as real school information.
+5. **Decide how school accounts are verified** before provisioning them; see
+   "Provisioning school accounts" below.
+6. **Re-run the accessibility audit** against the deployed build - see
+   [ACCESSIBILITY.md](ACCESSIBILITY.md) - and update
+   `operator.accessibilityAssessedOn`, which is the date the statement shows.
+
 ## Requirements
 
 - Node.js 20.11+ (the build is verified on Node 22)

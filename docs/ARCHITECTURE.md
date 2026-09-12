@@ -117,6 +117,30 @@ handful of times a day, so a query per request is by far the cheaper mistake. As
 second line of defence `getSiteUrl()` warns in production when the origin is unset or
 points at localhost.
 
+### Legal details live in one typed config, not in five translated catalogues
+
+`/imprint`, `/privacy` and `/accessibility` need the same handful of operator
+facts - legal name, address, data protection officer, accessibility contact.
+Embedding those in the message catalogues would mean maintaining them five times
+and would guarantee that the translations drift apart. They live in
+`src/config/operator.ts` instead: the catalogues hold only labels and prose, the
+pages compose the two.
+
+The config ships with `TODO:` placeholder values, and `unconfiguredFields()`
+reports which remain. `/imprint` then renders a visible notice listing them
+instead of a plausible-looking but invented Impressum, and `npm run check:legal`
+exits non-zero. Publishing invented provider details would be worse than
+publishing none.
+
+### Accessibility is tested twice, at different costs
+
+The browser audit (`e2e/a11y.mjs`, axe-core over 41 page states) is thorough but
+needs Chromium and a seeded database, so it is a pre-release step. Colour
+contrast - the single most regression-prone part, and the one the audit actually
+caught - is additionally guarded by `tests/contrast.test.ts`, which parses the
+oklch tokens straight out of `globals.css` and does the WCAG maths in Node. That
+runs with `npm test` in under a second.
+
 ### Times are stored as a date plus `"HH:mm"` text
 
 Schools publish wall-clock times ("open house 09:00-13:00"), and registration windows
@@ -171,10 +195,16 @@ These are real and deliberate, not oversights:
 4. **No CI end-to-end suite.** CI runs typecheck, lint, unit tests, a Prisma
    schema-vs-migrations drift check, the build and an HTTP smoke test (public pages
    200, `/admin` redirects, no cookies on public pages, invalid API input rejected).
-   The full browser flows - auth, CRUD, tenant isolation, the cookie-free journey -
-   were verified manually in Chromium and the scripts are checked in under `e2e/`,
-   but they are not wired into CI because they need a seeded database and a magic link
-   read from the server log.
+   The full browser flows - auth, CRUD, tenant isolation, the cookie-free
+   journey, the WCAG audit - were verified in Chromium and the scripts are
+   checked in under `e2e/`, but they are not wired into CI because they need
+   Chromium and a seeded database.
+
+   Note on obtaining a session for such a run: the verification token cannot be
+   read back out of the database, because Auth.js stores
+   `sha256(token + AUTH_SECRET)`. `e2e/get-session.mjs` therefore seeds a row
+   whose preimage it generated and redeems it like a real magic link - no
+   dev-only flag, no SMTP server and no test hook in the production auth path.
 5. **Audit diffs store values, not a signed chain.** Good enough to answer "who
    changed this and when"; it is not tamper-evident.
 6. **`script-src` still allows `'unsafe-inline'`.** Removing it requires per-request
@@ -182,6 +212,9 @@ These are real and deliberate, not oversights:
    conditions under which it should be revisited are in
    [PRIVACY.md](PRIVACY.md#why-unsafe-inline-is-still-in-script-src). `style-src` is
    strict.
-7. **`SUPER_ADMIN` has no UI for picking a school.** The role bypasses the
+7. **No screen-reader testing.** The largest remaining accessibility gap; see
+   [ACCESSIBILITY.md](ACCESSIBILITY.md#known-limitations). It is declared on the
+   public accessibility statement rather than glossed over.
+8. **`SUPER_ADMIN` has no UI for picking a school.** The role bypasses the
    school-scope check in `canEditSchool()`, but the admin pages still operate on the
    school attached to the account.

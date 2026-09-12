@@ -42,7 +42,17 @@ export function LeafletMap({
         maxZoom={19}
       />
       {markers.map((marker) => (
-        <Marker key={marker.id} position={[marker.latitude, marker.longitude]} icon={markerIcon}>
+        <Marker
+          key={marker.id}
+          position={[marker.latitude, marker.longitude]}
+          icon={markerIcon}
+          // Leaflet gives interactive markers role="button"; without a name they
+          // are announced as an unlabelled button (WCAG 4.1.2). `title` and
+          // `alt` both land on the marker element as its accessible name.
+          title={marker.name}
+          alt={marker.name}
+          keyboard
+        >
           <Popup>{marker.name}</Popup>
         </Marker>
       ))}

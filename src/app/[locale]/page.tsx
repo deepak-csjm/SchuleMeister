@@ -83,7 +83,7 @@ export default async function HomePage({ params, searchParams }: HomePageProps) 
                 center={resolution.center ?? undefined}
                 zoom={resolution.center ? 13 : 11}
               />
-              <ul className="grid gap-4 sm:grid-cols-2">
+              <ul className="grid gap-4 md:grid-cols-2">
                 {schools.map((school) => (
                   <li key={school.id} className="flex">
                     <SchoolCard school={school} />

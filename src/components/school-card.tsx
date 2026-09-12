@@ -36,7 +36,7 @@ export function SchoolCard({ school }: { school: SchoolListItem }) {
       <CardContent className="flex-1 space-y-2 text-sm text-muted-foreground">
         <p className="flex items-start gap-2">
           <MapPin aria-hidden className="mt-0.5 size-4 shrink-0" />
-          <span>
+          <span className="min-w-0 break-words">
             {school.address}, {school.postalCode} {school.city}
           </span>
         </p>
@@ -44,7 +44,7 @@ export function SchoolCard({ school }: { school: SchoolListItem }) {
         {school.nextEvent && (
           <p className="flex items-start gap-2 text-foreground">
             <CalendarDays aria-hidden className="mt-0.5 size-4 shrink-0 text-primary" />
-            <span>
+            <span className="min-w-0 break-words">
               <span className="font-medium">
                 {tEventType(school.nextEvent.eventType as 'OPEN_HOUSE')}
               </span>
@@ -70,7 +70,9 @@ export function SchoolCard({ school }: { school: SchoolListItem }) {
       </CardContent>
 
       <CardFooter>
-        <Button asChild variant="outline" size="sm">
+        {/* The label must be allowed to wrap: at 200% text size a nowrap
+            button is wider than its card. */}
+        <Button asChild variant="outline" size="sm" className="h-auto whitespace-normal py-2">
           <Link href={`/schools/${school.id}`}>{t('openDetails')}</Link>
         </Button>
       </CardFooter>

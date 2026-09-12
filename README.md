@@ -18,7 +18,7 @@ makes no third-party requests.
 | Styling | Tailwind CSS v4 + shadcn-style components, Lucide icons |
 | i18n | next-intl - German (default), English, Turkish, Ukrainian, Arabic (RTL) |
 | Maps | Leaflet + OpenStreetMap tiles, loaded only after explicit consent |
-| Tests | Vitest (156 unit tests) + CI smoke test |
+| Tests | Vitest (201 unit tests) + CI smoke test + axe-core audit |
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the reasoning behind these
 choices, including where the current implementation would need to change to scale
@@ -62,6 +62,7 @@ link is printed to the server console instead of being emailed.
 | `npm run db:deploy` | Apply migrations in production |
 | `npm run db:seed` | Seed demo data, or import open data (see below) |
 | `npm run db:studio` | Prisma Studio |
+| `npm run check:legal` | Fails while the Impressum/privacy details are still placeholders |
 
 ## Loading real school data
 
@@ -96,6 +97,8 @@ synthetic demo records (`DEMO-*` school numbers, `example.org` addresses). They 
 | `GET /api/schools` | Public JSON search API |
 | `GET /api/events/[eventId]/ics` | RFC 5545 calendar file for one event |
 | `GET /api/health` | Liveness probe including a database check |
+| `/imprint` | Impressum (§ 5 DDG), rendered from `src/config/operator.ts` |
+| `/accessibility` | Accessibility statement (BITV 2.0 / EU Directive 2016/2102) |
 | `GET /robots.txt` | Indexing rules; the staff area and API are excluded |
 | `GET /sitemap.xml` | All public pages with `hreflang` alternates for the five locales |
 
@@ -106,6 +109,35 @@ Parents reach a service like this through search, so this is treated as a featur
 locales, canonical and Open Graph tags, and Schema.org `School`/`Event` structured
 data on every school page so open house dates can appear as rich results. Set
 `SITE_URL` to the public origin - the app warns in production if it is missing.
+
+## Accessibility
+
+Audited against WCAG 2.1 AA: **41 page states, 0 axe-core violations**, across
+every public page in all five locales, the activated map, form error states and
+the admin pages. Reflow at 320 px, 200 % text enlargement, keyboard-only
+operation, focus visibility and heading structure were checked manually. The
+audit found and fixed four real defects, including a success badge at 3.91:1 and
+a `body { font-size: 16px }` rule that overrode the reader's own font-size
+setting.
+
+Contrast is guarded by `tests/contrast.test.ts`, which parses the oklch tokens
+out of `globals.css` and asserts 4.5:1 for all 17 text/surface pairs in both
+themes - no browser needed. Method, findings and the remaining gaps (no
+screen-reader pass yet) are in [docs/ACCESSIBILITY.md](docs/ACCESSIBILITY.md).
+
+## Legal pages
+
+`/imprint`, `/privacy` and `/accessibility` are implemented and translated, but
+every operator-specific detail - legal name, address, data protection officer,
+accessibility contact - lives in **one** file, `src/config/operator.ts`, so a
+lawyer reviews one place instead of legal text in five languages.
+
+Those values ship as `TODO:` placeholders. While any remain, `/imprint` renders a
+visible notice listing the missing fields instead of pretending to be complete,
+and `npm run check:legal` exits non-zero. **An Impressum is legally required in
+Germany (§ 5 DDG) and must not be published with invented details** - fill the
+config in and have both the imprint and the privacy policy reviewed before
+launch.
 
 ## Privacy and compliance
 
@@ -143,3 +175,7 @@ Documented rather than hidden - see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#
   an HTTP smoke test. The full browser flows are scripted in [`e2e/`](e2e/README.md)
   but run manually, as they need a seeded database and a magic link from the log.
 - `script-src` still permits `'unsafe-inline'`; see the linked reasoning above.
+- No screen-reader testing has been done - the largest remaining accessibility
+  gap, and declared as such on `/accessibility`.
+- The operator details in `src/config/operator.ts` are placeholders; the legal
+  pages are structurally complete but not yet legally reviewed.

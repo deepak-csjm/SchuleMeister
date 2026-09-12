@@ -3,6 +3,13 @@
 This file records what the code actually does, so a data-protection review can be
 checked against the implementation rather than against intentions.
 
+The user-facing pages are `/privacy` (plain-language description plus the
+disclosures Art. 13 GDPR requires), `/imprint` (§ 5 DDG) and `/accessibility`.
+Every operator-specific detail in them is read from `src/config/operator.ts`,
+which is where a reviewer should look - and which still holds `TODO:`
+placeholders. The legal bases stated on `/privacy` assume a **public-body
+operator** (Art. 6 (1) (e) GDPR); a private operator needs different bases.
+
 ## Zero parent data collection
 
 - The search, the school detail pages and the `.ics` download require no account and

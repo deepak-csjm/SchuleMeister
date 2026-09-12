@@ -23,7 +23,9 @@
     "signIn": "Anmelden",
     "signOut": "Abmelden",
     "privacy": "Datenschutz",
-    "skipToContent": "Zum Inhalt springen"
+    "skipToContent": "Zum Inhalt springen",
+    "imprint": "Impressum",
+    "accessibility": "Barrierefreiheit"
   },
   "locale": {
     "label": "Sprache",
@@ -219,10 +221,73 @@
     "mapTitle": "Karten",
     "mapBody": "Kartenkacheln werden erst nach Ihrer ausdrücklichen Bestätigung von OpenStreetMap geladen.",
     "hostingTitle": "Serverstandort",
-    "hostingBody": "Anwendung und Datenbank werden in der Europäischen Union betrieben (Region Frankfurt)."
+    "hostingBody": "Anwendung und Datenbank werden in der Europäischen Union betrieben (Region Frankfurt).",
+    "legal": {
+      "heading": "Rechtliche Pflichtangaben",
+      "controllerHeading": "Verantwortlicher",
+      "controllerBody": "Verantwortlich für die Verarbeitung im Sinne von Art. 4 Nr. 7 DSGVO ist der im Impressum genannte Anbieter.",
+      "dpoHeading": "Datenschutzbeauftragte Person",
+      "purposesHeading": "Zwecke und Rechtsgrundlagen",
+      "purposeSearchTitle": "Schulsuche (ohne Konto)",
+      "purposeSearchBody": "Für die Suche werden keine personenbezogenen Daten von Eltern erhoben oder gespeichert. Eine Suchanfrage wird nur zur Beantwortung der Anfrage verarbeitet. Rechtsgrundlage für den technisch notwendigen Betrieb ist Art. 6 Abs. 1 lit. e DSGVO in Verbindung mit der Aufgabe, öffentliche Schulinformationen bereitzustellen.",
+      "purposeStaffTitle": "Zugang für Schulpersonal",
+      "purposeStaffBody": "Für die Anmeldung von Schulsekretariaten werden dienstliche E-Mail-Adresse, Rolle, Schule und Anmeldezeitpunkte verarbeitet. Rechtsgrundlage ist Art. 6 Abs. 1 lit. e DSGVO; die Verarbeitung ist zur Aufgabenerfüllung erforderlich.",
+      "purposeAuditTitle": "Änderungsprotokoll",
+      "purposeAuditBody": "Jede Änderung an Schul- und Termindaten wird mit Zeitpunkt und handelnder E-Mail-Adresse protokolliert, damit veröffentlichte Informationen nachvollziehbar bleiben. Rechtsgrundlage ist Art. 6 Abs. 1 lit. e DSGVO.",
+      "recipientsHeading": "Empfänger und Auftragsverarbeiter",
+      "recipientsBody": "Eingesetzt werden ein Hosting-Anbieter und ein E-Mail-Dienstleister für den Versand der Anmeldelinks, jeweils auf Grundlage eines Auftragsverarbeitungsvertrags nach Art. 28 DSGVO. Eine Übermittlung in Drittländer findet nicht statt. Kartenkacheln werden ausschließlich nach Ihrer ausdrücklichen Bestätigung von der OpenStreetMap Foundation geladen; dabei wird Ihre IP-Adresse an diese übermittelt.",
+      "retentionHeading": "Speicherdauer",
+      "retentionBody": "Anmeldelinks verfallen nach 15 Minuten und werden nach Verwendung gelöscht. Konten von Schulpersonal werden gelöscht oder deaktiviert, wenn der Zugang nicht mehr benötigt wird. Einträge im Änderungsprotokoll werden entsprechend den Aufbewahrungsvorgaben des Anbieters gespeichert.",
+      "rightsHeading": "Ihre Rechte",
+      "rightsBody": "Sie haben das Recht auf Auskunft (Art. 15 DSGVO), Berichtigung (Art. 16), Löschung (Art. 17), Einschränkung der Verarbeitung (Art. 18), Datenübertragbarkeit (Art. 20) und Widerspruch (Art. 21). Wenden Sie sich dazu an die oben genannte datenschutzbeauftragte Person.",
+      "complaintHeading": "Beschwerderecht",
+      "complaintBody": "Sie können sich bei einer Datenschutz-Aufsichtsbehörde beschweren, für diese Anwendung insbesondere bei: {authority} ({url}).",
+      "automatedHeading": "Keine automatisierte Entscheidungsfindung",
+      "automatedBody": "Es findet keine automatisierte Entscheidungsfindung und kein Profiling statt. Die Suchergebnisse werden ausschließlich nach Entfernung und den von Ihnen gewählten Filtern sortiert.",
+      "authoritativeLanguage": "Rechtlich verbindlich ist die deutsche Fassung dieser Seite."
+    }
   },
   "footer": {
     "openData": "Schuldaten basieren auf offenen Daten des Landes Nordrhein-Westfalen.",
     "forSchools": "Für Schulen"
+  },
+  "imprint": {
+    "title": "Impressum",
+    "providerHeading": "Anbieter",
+    "legalForm": "Rechtsform",
+    "representedBy": "Vertreten durch",
+    "addressHeading": "Anschrift",
+    "contactHeading": "Kontakt",
+    "phone": "Telefon",
+    "email": "E-Mail",
+    "registerHeading": "Registereintrag",
+    "registerCourt": "Registergericht",
+    "registerNumber": "Registernummer",
+    "vatIdHeading": "Umsatzsteuer-Identifikationsnummer",
+    "contentResponsibleHeading": "Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV",
+    "supervisoryAuthorityHeading": "Aufsichtsbehörde",
+    "schoolContentNote": "Die Angaben zu den einzelnen Schulen und ihren Terminen werden von den Schulen selbst gepflegt. Für diese Inhalte sind die jeweiligen Schulen verantwortlich.",
+    "authoritativeLanguage": "Rechtlich verbindlich ist die deutsche Fassung dieser Seite.",
+    "notConfiguredTitle": "Impressum noch nicht hinterlegt",
+    "notConfiguredBody": "Die Angaben zum Anbieter sind in dieser Installation noch nicht eingetragen. Ein Impressum ist nach § 5 DDG gesetzlich vorgeschrieben: Bitte tragen Sie die Angaben in src/config/operator.ts ein, bevor diese Anwendung öffentlich erreichbar ist."
+  },
+  "accessibility": {
+    "title": "Erklärung zur Barrierefreiheit",
+    "intro": "Der Anbieter ist bemüht, diese Anwendung barrierefrei zugänglich zu machen. Diese Erklärung gilt für {url}.",
+    "statusHeading": "Stand der Vereinbarkeit mit den Anforderungen",
+    "statusBody": "Diese Anwendung ist mit den WCAG 2.1 auf Konformitätsstufe AA weitgehend vereinbar. Die unten genannten Punkte sind noch nicht abschließend geprüft.",
+    "testedHeading": "Erstellung dieser Erklärung",
+    "testedBody": "Diese Erklärung wurde am {date} auf Grundlage einer Selbstbewertung erstellt. Geprüft wurden alle öffentlichen Seiten in allen fünf Sprachfassungen sowie der Anmeldebereich für Schulen: automatisiert mit axe-core gegen WCAG 2.1 A und AA, ergänzt um manuelle Prüfungen der Bedienbarkeit per Tastatur, der Darstellung bei 320 Pixel Breite, der Textvergrößerung auf 200 Prozent, der Farbkontraste und der Dokumentstruktur.",
+    "limitationsHeading": "Nicht barrierefreie Inhalte",
+    "limitationsMapTitle": "Kartenansicht",
+    "limitationsMapBody": "Die Karte wird mit einer Fremdbibliothek (Leaflet) dargestellt. Kartenmarkierungen sind per Tastatur erreichbar und benannt, eine vollständige Prüfung der Kartenbedienung mit Screenreadern steht noch aus. Alle Informationen der Karte stehen auch als Liste und auf den Schulseiten in Textform zur Verfügung; die Karte wird zudem erst nach ausdrücklicher Bestätigung geladen.",
+    "limitationsSchoolTextTitle": "Von Schulen eingegebene Texte",
+    "limitationsSchoolTextBody": "Beschreibungen und Hinweise werden von den Schulen selbst eingegeben. Auf Verständlichkeit und Struktur dieser Texte hat der Anbieter keinen unmittelbaren Einfluss.",
+    "limitationsScreenReaderTitle": "Screenreader-Prüfung",
+    "limitationsScreenReaderBody": "Eine vollständige Prüfung mit Screenreadern (etwa NVDA, JAWS, VoiceOver) und mit Nutzenden mit Behinderungen ist noch nicht erfolgt.",
+    "feedbackHeading": "Barrieren melden",
+    "feedbackBody": "Sind Ihnen Barrieren aufgefallen oder benötigen Sie Informationen in einer zugänglichen Form? Melden Sie sich unter {email}. Wir antworten so schnell wie möglich.",
+    "enforcementHeading": "Schlichtungsverfahren",
+    "enforcementBody": "Wenn Sie auf Ihre Meldung keine zufriedenstellende Antwort erhalten, können Sie sich an die {body} wenden: {url}."
   }
 }
