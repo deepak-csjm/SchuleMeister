@@ -17,6 +17,7 @@ half-configured state.
 | `DATABASE_URL` | yes | EU region. For a pooled connection append `?pgbouncer=true&connection_limit=1` |
 | `AUTH_SECRET` | yes | `npx auth secret` or `openssl rand -base64 32` |
 | `AUTH_URL` | yes in production | Public origin; magic-link callbacks are built from it |
+| `SITE_URL` | recommended | Canonical origin for canonical tags, hreflang, the sitemap and structured data. Falls back to `AUTH_URL`; the app logs a warning in production if it is unset or localhost |
 | `ALLOWED_ADMIN_EMAIL_DOMAINS` | yes | Comma-separated. Supports `*.nrw.schule` for subdomains |
 | `EMAIL_FROM`, `EMAIL_SERVER_HOST`, `EMAIL_SERVER_PORT` | yes | Port 465 switches to implicit TLS |
 | `EMAIL_SERVER_USER`, `EMAIL_SERVER_PASSWORD` | if the relay needs auth | Omit both for an unauthenticated relay |
@@ -41,6 +42,16 @@ the release. Run `npm test` and `npm run lint` in CI before building.
 
 `postinstall` runs `prisma generate`, so the client is always in sync with the schema
 in a fresh install.
+
+The build does **not** require a reachable database. `robots.txt` and `sitemap.xml` are
+generated per request (`dynamic = 'force-dynamic'`) so they pick up the runtime
+`SITE_URL`; the sitemap additionally degrades to its static entries if the database is
+unreachable, rather than failing the request.
+
+CI (`.github/workflows/ci.yml`) runs typecheck, lint, unit tests, a Prisma
+schema-vs-migrations drift check, the build, and a smoke test that asserts the public
+pages answer 200, `/admin` redirects anonymously, public pages set no cookies, and the
+search API rejects invalid input.
 
 ## Vercel
 

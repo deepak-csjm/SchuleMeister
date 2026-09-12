@@ -194,11 +194,17 @@
       "tooLong": "This text is too long."
     },
     "actions": {
-      "school.update": "School profile updated",
-      "event.create": "Date created",
-      "event.update": "Date updated",
-      "event.delete": "Date deleted",
-      "auth.signin": "Sign-in"
+      "school": {
+        "update": "School profile updated"
+      },
+      "event": {
+        "create": "Date created",
+        "update": "Date updated",
+        "delete": "Date deleted"
+      },
+      "auth": {
+        "signin": "Sign-in"
+      }
     }
   },
   "privacy": {

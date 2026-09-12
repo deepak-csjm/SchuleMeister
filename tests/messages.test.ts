@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { AUDIT_ACTIONS } from '@/lib/audit-actions';
 import { routing } from '@/i18n/routing';
 
 type Messages = { [key: string]: string | Messages };
@@ -19,6 +20,21 @@ function flatten(messages: Messages, prefix = ''): Record<string, string> {
     }
     return accumulator;
   }, {});
+}
+
+/**
+ * Resolves a dotted key the way next-intl does: by descending one segment at a
+ * time. This is deliberately NOT `flatten()[key]` - flattening a nested group
+ * and flattening a flat key that merely *contains* dots produce the same string,
+ * which is exactly how an unreachable `"event.update"` key can look correct.
+ */
+function resolvePath(messages: Messages, path: string): string | undefined {
+  let current: string | Messages | undefined = messages;
+  for (const segment of path.split('.')) {
+    if (typeof current !== 'object' || current === null) return undefined;
+    current = current[segment];
+  }
+  return typeof current === 'string' ? current : undefined;
 }
 
 /** Simple ICU argument names, ignoring the inner parts of plural blocks. */
@@ -71,6 +87,21 @@ describe('message catalogues', () => {
       .map(([key]) => key);
     expect(empty).toEqual([]);
   });
+
+  it.each(routing.locales)(
+    '%s has a readable label for every audit action',
+    (locale) => {
+      const messages = load(locale);
+      // The dots in an action are message paths, not part of a flat key:
+      // next-intl resolves `event.update` as admin.actions.event.update. A flat
+      // "event.update" key is unreachable and silently falls back to the raw
+      // identifier in the admin audit panel.
+      const missing = AUDIT_ACTIONS.filter(
+        (action) => resolvePath(messages, `admin.actions.${action}`) === undefined,
+      );
+      expect(missing).toEqual([]);
+    },
+  );
 
   it('keeps a plural form for the result count in every locale', () => {
     for (const locale of routing.locales) {

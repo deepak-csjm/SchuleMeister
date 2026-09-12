@@ -194,11 +194,17 @@
       "tooLong": "Der Text ist zu lang."
     },
     "actions": {
-      "school.update": "Schulprofil geändert",
-      "event.create": "Termin angelegt",
-      "event.update": "Termin geändert",
-      "event.delete": "Termin gelöscht",
-      "auth.signin": "Anmeldung"
+      "school": {
+        "update": "Schulprofil geändert"
+      },
+      "event": {
+        "create": "Termin angelegt",
+        "update": "Termin geändert",
+        "delete": "Termin gelöscht"
+      },
+      "auth": {
+        "signin": "Anmeldung"
+      }
     }
   },
   "privacy": {

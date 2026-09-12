@@ -102,6 +102,21 @@ database on every public page view, making every page dynamic and uncacheable. T
 header is session-free, which is what lets `/privacy` and `/signin/check-email`
 prerender statically for all five locales.
 
+### Discoverability is a product requirement, not an afterthought
+
+Parents find a service like this through a search engine, so `robots.ts`, a localized
+`sitemap.ts` and Schema.org structured data on every school page are part of the
+feature set rather than polish. The sitemap carries `hreflang` alternates for all five
+locales, and each school page emits a `School`/`Event` graph so that open house dates
+can surface as rich results.
+
+Both metadata routes are `dynamic = 'force-dynamic'`. With ISR they are prerendered at
+build time, which silently bakes the *build machine's* origin into every URL - a
+sitemap pointing at the wrong host is worse than no sitemap. Crawlers fetch these a
+handful of times a day, so a query per request is by far the cheaper mistake. As a
+second line of defence `getSiteUrl()` warns in production when the origin is unset or
+points at localhost.
+
 ### Times are stored as a date plus `"HH:mm"` text
 
 Schools publish wall-clock times ("open house 09:00-13:00"), and registration windows
@@ -153,12 +168,20 @@ These are real and deliberate, not oversights:
    magic links are complete. The Auth.js WebAuthn provider additionally requires
    database sessions and an `Authenticator` model, which conflicts with the current
    JWT strategy - a deliberate scope decision, not a stub.
-4. **No CI end-to-end suite.** Unit tests cover the pure logic; the auth, CRUD and
-   privacy flows were verified manually in Chromium and the scripts are checked in
-   under `e2e/`, but they are not wired into `npm test` because they need a running
-   server and a seeded database.
+4. **No CI end-to-end suite.** CI runs typecheck, lint, unit tests, a Prisma
+   schema-vs-migrations drift check, the build and an HTTP smoke test (public pages
+   200, `/admin` redirects, no cookies on public pages, invalid API input rejected).
+   The full browser flows - auth, CRUD, tenant isolation, the cookie-free journey -
+   were verified manually in Chromium and the scripts are checked in under `e2e/`,
+   but they are not wired into CI because they need a seeded database and a magic link
+   read from the server log.
 5. **Audit diffs store values, not a signed chain.** Good enough to answer "who
    changed this and when"; it is not tamper-evident.
-6. **`SUPER_ADMIN` has no UI for picking a school.** The role bypasses the
+6. **`script-src` still allows `'unsafe-inline'`.** Removing it requires per-request
+   nonces, which force every page to render dynamically. The reasoning and the
+   conditions under which it should be revisited are in
+   [PRIVACY.md](PRIVACY.md#why-unsafe-inline-is-still-in-script-src). `style-src` is
+   strict.
+7. **`SUPER_ADMIN` has no UI for picking a school.** The role bypasses the
    school-scope check in `canEditSchool()`, but the admin pages still operate on the
    school attached to the account.

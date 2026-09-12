@@ -194,11 +194,17 @@
       "tooLong": "النص طويل جداً."
     },
     "actions": {
-      "school.update": "تم تحديث ملف المدرسة",
-      "event.create": "تم إنشاء موعد",
-      "event.update": "تم تحديث موعد",
-      "event.delete": "تم حذف موعد",
-      "auth.signin": "تسجيل الدخول"
+      "school": {
+        "update": "تم تحديث ملف المدرسة"
+      },
+      "event": {
+        "create": "تم إنشاء موعد",
+        "update": "تم تحديث موعد",
+        "delete": "تم حذف موعد"
+      },
+      "auth": {
+        "signin": "تسجيل الدخول"
+      }
     }
   },
   "privacy": {

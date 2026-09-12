@@ -6,6 +6,7 @@ import type { ReactNode } from 'react';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
 import { localeDirection, routing } from '@/i18n/routing';
+import { absoluteUrl, getSiteUrl } from '@/lib/site-url';
 import '../globals.css';
 
 export const viewport: Viewport = {
@@ -34,13 +35,20 @@ export async function generateMetadata({
     title: { default: t('appName'), template: `%s · ${t('appName')}` },
     description: t('tagline'),
     robots: { index: true, follow: true },
+    metadataBase: new URL(getSiteUrl()),
     alternates: {
+      canonical: absoluteUrl('/', locale),
       languages: Object.fromEntries(
-        routing.locales.map((candidate) => [
-          candidate,
-          candidate === routing.defaultLocale ? '/' : `/${candidate}`,
-        ]),
+        routing.locales.map((candidate) => [candidate, absoluteUrl('/', candidate)]),
       ),
+    },
+    openGraph: {
+      type: 'website',
+      siteName: t('appName'),
+      title: t('appName'),
+      description: t('tagline'),
+      url: absoluteUrl('/', locale),
+      locale,
     },
   };
 }

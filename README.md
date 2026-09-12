@@ -18,7 +18,7 @@ makes no third-party requests.
 | Styling | Tailwind CSS v4 + shadcn-style components, Lucide icons |
 | i18n | next-intl - German (default), English, Turkish, Ukrainian, Arabic (RTL) |
 | Maps | Leaflet + OpenStreetMap tiles, loaded only after explicit consent |
-| Tests | Vitest (143 unit tests) |
+| Tests | Vitest (156 unit tests) + CI smoke test |
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the reasoning behind these
 choices, including where the current implementation would need to change to scale
@@ -96,6 +96,16 @@ synthetic demo records (`DEMO-*` school numbers, `example.org` addresses). They 
 | `GET /api/schools` | Public JSON search API |
 | `GET /api/events/[eventId]/ics` | RFC 5545 calendar file for one event |
 | `GET /api/health` | Liveness probe including a database check |
+| `GET /robots.txt` | Indexing rules; the staff area and API are excluded |
+| `GET /sitemap.xml` | All public pages with `hreflang` alternates for the five locales |
+
+## Discoverability
+
+Parents reach a service like this through search, so this is treated as a feature:
+`robots.txt`, a per-request `sitemap.xml` with `hreflang` alternates for all five
+locales, canonical and Open Graph tags, and Schema.org `School`/`Event` structured
+data on every school page so open house dates can appear as rich results. Set
+`SITE_URL` to the public origin - the app warns in production if it is missing.
 
 ## Privacy and compliance
 
@@ -112,6 +122,8 @@ Implemented, and verified end to end in a browser:
   request to a third party.
 - Every content edit is recorded in `AuditLog` with actor, timestamp and a field
   level diff.
+- `style-src` carries no `'unsafe-inline'`; the remaining `script-src` exception is
+  explained, with measurements, in [docs/PRIVACY.md](docs/PRIVACY.md#why-unsafe-inline-is-still-in-script-src).
 
 Details and the deployment requirements (EU region, retention) are in
 [docs/PRIVACY.md](docs/PRIVACY.md) and [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
@@ -127,5 +139,7 @@ Documented rather than hidden - see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#
   instances. Back it with Redis before scaling out.
 - Passkeys are not implemented. Magic links are complete; the WebAuthn provider
   additionally needs database sessions and an `Authenticator` model.
-- No automated end-to-end suite is wired into CI. The manual browser checks that
-  were run are scripted in [`e2e/`](e2e/README.md).
+- CI covers typecheck, lint, unit tests, Prisma schema/migration drift, the build and
+  an HTTP smoke test. The full browser flows are scripted in [`e2e/`](e2e/README.md)
+  but run manually, as they need a seeded database and a magic link from the log.
+- `script-src` still permits `'unsafe-inline'`; see the linked reasoning above.

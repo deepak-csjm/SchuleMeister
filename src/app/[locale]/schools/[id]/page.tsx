@@ -12,11 +12,15 @@ import { getFormatter, getTranslations, setRequestLocale } from 'next-intl/serve
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { EventList } from '@/components/event-list';
+import { JsonLd } from '@/components/json-ld';
 import { SchoolMap } from '@/components/school-map';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Link } from '@/i18n/navigation';
 import { startOfTodayInAppZone } from '@/lib/datetime';
+import { routing } from '@/i18n/routing';
+import { absoluteUrl } from '@/lib/site-url';
+import { buildSchoolJsonLd } from '@/lib/structured-data';
 import { getSchoolDetail } from '@/server/schools';
 
 interface SchoolPageProps {
@@ -24,13 +28,29 @@ interface SchoolPageProps {
 }
 
 export async function generateMetadata({ params }: SchoolPageProps): Promise<Metadata> {
-  const { id } = await params;
+  const { locale, id } = await params;
   const school = await getSchoolDetail(id);
   if (!school) return {};
 
+  const path = `/schools/${school.id}`;
+  const description = `${school.name}, ${school.address}, ${school.postalCode} ${school.city}`;
+
   return {
     title: school.name,
-    description: `${school.name}, ${school.address}, ${school.postalCode} ${school.city}`,
+    description,
+    alternates: {
+      canonical: absoluteUrl(path, locale),
+      languages: Object.fromEntries(
+        routing.locales.map((candidate) => [candidate, absoluteUrl(path, candidate)]),
+      ),
+    },
+    openGraph: {
+      type: 'profile',
+      title: school.name,
+      description,
+      url: absoluteUrl(path, locale),
+      locale,
+    },
   };
 }
 
@@ -55,8 +75,16 @@ export default async function SchoolDetailPage({ params }: SchoolPageProps) {
 
   const hasCoordinates = school.latitude !== null && school.longitude !== null;
 
+  const jsonLd = buildSchoolJsonLd(
+    school,
+    // Only upcoming dates are worth exposing as events to a search engine.
+    upcoming,
+    absoluteUrl(`/schools/${school.id}`, locale),
+  );
+
   return (
     <article className="space-y-6">
+      <JsonLd data={jsonLd} />
       <Link
         href="/"
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground hover:underline"

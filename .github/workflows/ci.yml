@@ -1,0 +1,125 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Typecheck, lint, test, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: schulkompass_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      # Prisma needs DATABASE_URL to be present for `generate` (which runs as a
+      # postinstall step), not just for queries.
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/schulkompass_ci?schema=public
+      SHADOW_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/schulkompass_shadow?schema=public
+      # Not a real secret: the build only requires the variable to be well-formed.
+      AUTH_SECRET: ci-placeholder-secret-value-0000000000
+      AUTH_URL: http://localhost:3000
+      SITE_URL: http://localhost:3000
+      ALLOWED_ADMIN_EMAIL_DOMAINS: example.org
+      EMAIL_FROM: SchulKompass CI <noreply@example.org>
+      NEXT_TELEMETRY_DISABLED: '1'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Create the shadow database used by the drift check
+        run: PGPASSWORD=postgres psql -h localhost -U postgres -d postgres -c 'CREATE DATABASE schulkompass_shadow;'
+
+      - name: Check migrations match the schema
+        # Exit code 2 means prisma/schema.prisma contains changes that no
+        # migration covers - i.e. someone edited the schema without running
+        # `npm run db:migrate`.
+        run: |
+          npx prisma migrate diff \
+            --from-migrations prisma/migrations \
+            --to-schema-datamodel prisma/schema.prisma \
+            --shadow-database-url "$SHADOW_DATABASE_URL" \
+            --exit-code
+
+      - name: Apply migrations
+        run: npx prisma migrate deploy
+
+      - name: Seed demo data
+        run: npm run db:seed
+
+      - name: Build
+        run: npm run build
+
+      - name: Smoke-test the production server
+        run: |
+          AUTH_DEV_LOG_MAGIC_LINK=false PORT=3000 npm start &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+
+          for _ in $(seq 1 45); do
+            if curl -fsS http://localhost:3000/api/health > /dev/null; then break; fi
+            sleep 1
+          done
+
+          echo "--- health ---"
+          curl -fsS http://localhost:3000/api/health
+
+          echo "--- pages must answer 200 ---"
+          for path in / /en /ar /privacy /signin /robots.txt /sitemap.xml; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:3000$path")
+            echo "$path -> $code"
+            [ "$code" = "200" ] || exit 1
+          done
+
+          echo "--- the admin area must not be reachable anonymously ---"
+          code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/admin)
+          echo "/admin -> $code"
+          [ "$code" = "307" ] || exit 1
+
+          echo "--- public pages must set no cookies ---"
+          if curl -s -D - -o /dev/null http://localhost:3000/ | grep -i '^set-cookie'; then
+            echo 'regression: a public page set a cookie'
+            exit 1
+          fi
+
+          echo "--- the search API must reject invalid input ---"
+          code=$(curl -s -o /dev/null -w '%{http_code}' 'http://localhost:3000/api/schools?radius=9999')
+          echo "invalid radius -> $code"
+          [ "$code" = "400" ] || exit 1

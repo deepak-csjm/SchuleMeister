@@ -1,12 +1,8 @@
 import { Prisma } from '@prisma/client';
+import type { AuditAction } from './audit-actions';
 import { prisma } from './prisma';
 
-export type AuditAction =
-  | 'school.update'
-  | 'event.create'
-  | 'event.update'
-  | 'event.delete'
-  | 'auth.signin';
+export type { AuditAction };
 
 export interface AuditContext {
   action: AuditAction;

@@ -194,11 +194,17 @@
       "tooLong": "Текст занадто довгий."
     },
     "actions": {
-      "school.update": "Профіль школи змінено",
-      "event.create": "Дату створено",
-      "event.update": "Дату оновлено",
-      "event.delete": "Дату видалено",
-      "auth.signin": "Вхід"
+      "school": {
+        "update": "Профіль школи змінено"
+      },
+      "event": {
+        "create": "Дату створено",
+        "update": "Дату оновлено",
+        "delete": "Дату видалено"
+      },
+      "auth": {
+        "signin": "Вхід"
+      }
     }
   },
   "privacy": {

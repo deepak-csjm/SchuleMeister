@@ -16,8 +16,16 @@ const csp = [
   "default-src 'self'",
   // React's development build uses eval() for its debugging features; the
   // production build never does, so 'unsafe-eval' is dev-only.
+  // 'unsafe-inline' is still required here: Next.js emits inline bootstrap and
+  // streaming-payload scripts on every page. Removing it means nonces, and
+  // nonces require every page to be dynamically rendered (see
+  // node_modules/next/dist/docs/01-app/02-guides/content-security-policy.md).
+  // That trade-off is revisited in docs/PRIVACY.md.
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}`,
-  "style-src 'self' 'unsafe-inline'",
+  // No inline <style> element or style="" attribute is rendered anywhere, so
+  // this stays strict. Leaflet mutates element.style from JavaScript, which CSP
+  // does not govern.
+  "style-src 'self'",
   "img-src 'self' data: blob: https://*.tile.openstreetmap.org",
   "connect-src 'self' https://*.tile.openstreetmap.org",
   "font-src 'self' data:",

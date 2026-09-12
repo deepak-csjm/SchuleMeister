@@ -80,13 +80,37 @@ Set for every route in `next.config.ts`:
 | Header | Value |
 | --- | --- |
 | `Content-Security-Policy` | `self` only, plus OSM tile hosts for images and connections; `'unsafe-eval'` in development only (React's dev build needs it) |
+| `style-src` | `'self'` - no `'unsafe-inline'`. Verified: the rendered HTML contains no `<style>` element and no `style=""` attribute |
 | `Referrer-Policy` | `no-referrer` |
 | `X-Content-Type-Options` | `nosniff` |
 | `X-Frame-Options` / `frame-ancestors` | `DENY` / `'none'` |
 | `Permissions-Policy` | camera, microphone and payment off; geolocation `self` |
 | `Strict-Transport-Security` | 2 years, `includeSubDomains`, `preload` |
 
-`'unsafe-inline'` remains in `script-src` and `style-src`: Next.js emits inline
-bootstrap scripts and Tailwind injects styles. Tightening this needs a nonce-based CSP
-wired through the proxy - a worthwhile follow-up, listed here so it is not mistaken
-for finished work.
+### Why `'unsafe-inline'` is still in `script-src`
+
+`style-src` was tightened to `'self'` after measuring the rendered HTML: there is no
+inline `<style>` element and no `style=""` attribute on any page (the root 404 page
+was rewritten to use stylesheet classes for exactly this reason). Leaflet mutates
+`element.style` from JavaScript, which CSP does not govern - the map was re-checked in
+Chromium with the stricter policy and reports no violations.
+
+`script-src` still needs `'unsafe-inline'`, and this is a deliberate decision rather
+than an unfinished task:
+
+- Next.js emits six inline scripts per page (bootstrap plus the streaming payload).
+  The only way to allow them without `'unsafe-inline'` is a per-request nonce.
+- Next.js can only inject a nonce during server-side rendering, so **every page would
+  have to become dynamically rendered** (confirmed in
+  `node_modules/next/dist/docs/01-app/02-guides/content-security-policy.md`). That
+  gives up static prerendering of `/privacy` and `/signin/check-email` in all five
+  locales, and adds request-time work to a service whose main audience is on mobile.
+- The practical XSS surface it would protect is close to zero: the app renders no
+  user-supplied HTML. Every piece of school-supplied text goes through JSX as text
+  and is escaped by React. The single `dangerouslySetInnerHTML` in the codebase is
+  `src/components/json-ld.tsx`, which serialises an object with `JSON.stringify` and
+  additionally escapes `<` to `\u003c`, so school text cannot close the script
+  element (covered by a unit test).
+
+Revisit this if the app ever renders rich text, embeds third-party scripts, or starts
+accepting HTML from schools - at that point the nonce cost is worth paying.

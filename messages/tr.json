@@ -194,11 +194,17 @@
       "tooLong": "Bu metin çok uzun."
     },
     "actions": {
-      "school.update": "Okul profili güncellendi",
-      "event.create": "Tarih oluşturuldu",
-      "event.update": "Tarih güncellendi",
-      "event.delete": "Tarih silindi",
-      "auth.signin": "Giriş"
+      "school": {
+        "update": "Okul profili güncellendi"
+      },
+      "event": {
+        "create": "Tarih oluşturuldu",
+        "update": "Tarih güncellendi",
+        "delete": "Tarih silindi"
+      },
+      "auth": {
+        "signin": "Giriş"
+      }
     }
   },
   "privacy": {
