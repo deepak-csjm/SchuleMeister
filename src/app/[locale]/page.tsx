@@ -62,8 +62,19 @@ export default async function HomePage({ params, searchParams }: HomePageProps) 
         </p>
       ) : (
         <section className="space-y-4">
-          <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h2 className="text-lg font-semibold" role="status">
+          {/*
+            The live region is the container, not the heading: role="status" on
+            an <h2> replaces its heading role, which takes the results section
+            out of heading navigation for screen reader users. This way the
+            count is still announced when the filters change *and* the heading
+            stays a heading.
+          */}
+          <div
+            className="flex flex-wrap items-baseline justify-between gap-2"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            <h2 className="text-lg font-semibold">
               {tSearch('resultCount', { count: schools.length })}
             </h2>
             {hasQuery && resolution.label && (

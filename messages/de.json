@@ -25,7 +25,9 @@
     "privacy": "Datenschutz",
     "skipToContent": "Zum Inhalt springen",
     "imprint": "Impressum",
-    "accessibility": "Barrierefreiheit"
+    "accessibility": "Barrierefreiheit",
+    "mainNavigation": "Hauptnavigation",
+    "legalNavigation": "Rechtliche Hinweise"
   },
   "locale": {
     "label": "Sprache",

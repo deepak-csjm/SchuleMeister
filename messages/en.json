@@ -25,7 +25,9 @@
     "privacy": "Privacy",
     "skipToContent": "Skip to content",
     "imprint": "Imprint",
-    "accessibility": "Accessibility"
+    "accessibility": "Accessibility",
+    "mainNavigation": "Main navigation",
+    "legalNavigation": "Legal information"
   },
   "locale": {
     "label": "Language",

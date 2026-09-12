@@ -19,7 +19,7 @@ export default async function CheckEmailPage({
     <div className="mx-auto max-w-md">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle as="h1" className="flex items-center gap-2">
             <MailCheck aria-hidden className="size-5 text-primary" />
             {t('checkEmailTitle')}
           </CardTitle>

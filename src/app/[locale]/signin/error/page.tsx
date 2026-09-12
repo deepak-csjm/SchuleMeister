@@ -34,7 +34,7 @@ export default async function AuthErrorPage({
     <div className="mx-auto max-w-md">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle as="h1" className="flex items-center gap-2">
             <TriangleAlert aria-hidden className="size-5 text-destructive" />
             {t('errorTitle')}
           </CardTitle>

@@ -8,8 +8,11 @@ const AXE = readFileSync(
 const SESSION = process.argv[3];
 const SCHOOL = process.argv[2] || (await discoverFixtures()).schoolId;
 
-// WCAG 2.1 A + AA, which is what BITV 2.0 / the EU directive require.
-const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
+// WCAG 2.1 A + AA is what BITV 2.0 / the EU directive require. axe's
+// best-practice set is included as well: it is where page-has-heading-one,
+// heading-order and landmark-unique live, and those caught a real defect (the
+// sign-in pages had no level-1 heading at all).
+const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'best-practice'];
 
 const LOCALES = [
   { code: 'de', prefix: '', browser: 'de-DE' },
@@ -133,7 +136,7 @@ if (SESSION) {
 await browser.close();
 
 console.log(`\n=== ${checks} page states audited against ${TAGS.join(', ')} ===`);
-check(`${checks} page states have no WCAG 2.1 A/AA violations`, findings.length === 0, `${findings.length} violation instance(s)`);
+check(`${checks} page states have no WCAG 2.1 A/AA or best-practice violations`, findings.length === 0, `${findings.length} violation instance(s)`);
 if (findings.length > 0) {
   const byRule = new Map();
   for (const f of findings) {

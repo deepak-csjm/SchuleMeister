@@ -25,7 +25,9 @@
     "privacy": "Захист даних",
     "skipToContent": "Перейти до змісту",
     "imprint": "Вихідні дані",
-    "accessibility": "Доступність"
+    "accessibility": "Доступність",
+    "mainNavigation": "Головна навігація",
+    "legalNavigation": "Правова інформація"
   },
   "locale": {
     "label": "Мова",

@@ -25,7 +25,9 @@
     "privacy": "حماية البيانات",
     "skipToContent": "الانتقال إلى المحتوى",
     "imprint": "بيانات النشر",
-    "accessibility": "إمكانية الوصول"
+    "accessibility": "إمكانية الوصول",
+    "mainNavigation": "التنقل الرئيسي",
+    "legalNavigation": "المعلومات القانونية"
   },
   "locale": {
     "label": "اللغة",

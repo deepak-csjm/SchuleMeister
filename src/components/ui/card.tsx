@@ -14,8 +14,19 @@ export function CardHeader({ className, ...props }: React.ComponentProps<'div'>)
   return <div className={cn('flex flex-col gap-1.5 p-4 sm:p-5', className)} {...props} />;
 }
 
-export function CardTitle({ className, ...props }: React.ComponentProps<'h2'>) {
-  return <h2 className={cn('text-lg font-semibold leading-snug tracking-tight', className)} {...props} />;
+/**
+ * Renders an `<h2>` by default. Pass `as="h1"` when the card *is* the page's
+ * main subject (the sign-in screens, for example) - a page with no level-1
+ * heading leaves screen reader users without an entry point.
+ */
+export function CardTitle({
+  className,
+  as: Component = 'h2',
+  ...props
+}: React.ComponentProps<'h2'> & { as?: 'h1' | 'h2' | 'h3' }) {
+  return (
+    <Component className={cn('text-lg font-semibold leading-snug tracking-tight', className)} {...props} />
+  );
 }
 
 export function CardDescription({ className, ...props }: React.ComponentProps<'p'>) {

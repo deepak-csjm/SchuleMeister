@@ -76,6 +76,23 @@ and - when given a session - the admin pages. Prints one line per rule with the
 affected page states. Distinct from `tests/contrast.test.ts`, which guards the
 design tokens' contrast ratios without needing a browser.
 
+## `a11y-tree.mjs` - what assistive technology is handed
+
+```bash
+node e2e/a11y-tree.mjs "$SESSION"        # the session argument is optional
+```
+
+Reads Chromium's computed accessibility tree over CDP and checks the things a
+rule scan cannot: links that announce identically but lead somewhere different,
+whether the result count is both a heading and a live announcement (and whether
+the announcement actually changes), whether map markers name their school, and
+whether form errors are programmatically tied to their field.
+
+Two traps this script exists to avoid repeating: accessible names must come from
+the browser (a hand-rolled implementation misreported the language switcher), and
+`Accessibility.getFullAXTree` does not return nodes in document order, so
+anything positional is read from the DOM.
+
 ## `a11y-manual.mjs` - the criteria axe cannot test
 
 ```bash

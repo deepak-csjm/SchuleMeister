@@ -132,7 +132,16 @@ instead of a plausible-looking but invented Impressum, and `npm run check:legal`
 exits non-zero. Publishing invented provider details would be worse than
 publishing none.
 
-### Accessibility is tested twice, at different costs
+### Accessibility is tested at three levels
+
+Rules (`a11y.mjs`, axe-core over the WCAG and best-practice sets), the computed
+accessibility tree (`a11y-tree.mjs`, via CDP - names, announcements, error
+association), and the criteria neither can reach (`a11y-manual.mjs` - reflow,
+text resize, keyboard operation). They overlap as little as possible: the tree
+audit deliberately does not re-check heading order or landmark uniqueness,
+because axe's best-practice rules already do.
+
+### Contrast is tested twice, at different costs
 
 The browser audit (`e2e/a11y.mjs`, axe-core over 41 page states) runs in CI.
 Colour contrast - the single most regression-prone part, and the one the audit

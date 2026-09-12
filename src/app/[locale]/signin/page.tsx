@@ -32,7 +32,7 @@ export default async function SignInPage({
     <div className="mx-auto max-w-md">
       <Card>
         <CardHeader>
-          <CardTitle>{t('signInTitle')}</CardTitle>
+          <CardTitle as="h1">{t('signInTitle')}</CardTitle>
           <CardDescription>{t('signInIntro')}</CardDescription>
         </CardHeader>
         <CardContent>

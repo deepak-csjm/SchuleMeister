@@ -27,7 +27,7 @@ await page.goto(BASE, { waitUntil: 'networkidle' });
 check('heading is rendered', (await page.locator('h1').textContent())?.includes('Schule') ?? false);
 check(
   'all seeded schools are listed',
-  (await page.locator('h2[role=status]').textContent())?.includes(String(schoolCount)) ?? false,
+  (await page.locator('[aria-live] h2').textContent())?.includes(String(schoolCount)) ?? false,
   `${schoolCount} schools`,
 );
 checkEqual('no third-party request before map consent', [...new Set(thirdParty)].join(',') || 'none', 'none');
@@ -42,9 +42,9 @@ await page.waitForURL(/q=40213/, { timeout: 20000 });
 await page.waitForLoadState('networkidle');
 const search = new URL(page.url()).search;
 check('filters are reflected in a shareable URL', search.includes('radius=2') && search.includes('ogs=true'), search);
-const resultCount = Number(/(\d+)/.exec((await page.locator('h2[role=status]').textContent()) ?? '')?.[1] ?? 0);
+const resultCount = Number(/(\d+)/.exec((await page.locator('[aria-live] h2').textContent()) ?? '')?.[1] ?? 0);
 check('the radius narrows the result set', resultCount > 0 && resultCount < schoolCount, `${resultCount} of ${schoolCount}`);
-check('the resolved location is shown', ((await page.locator('h2[role=status] ~ p').textContent()) ?? '').includes('40213'));
+check('the resolved location is shown', ((await page.locator('[aria-live] p').textContent()) ?? '').includes('40213'));
 
 section('map consent gate');
 const loadMap = page.getByRole('button', { name: 'Karte laden' });

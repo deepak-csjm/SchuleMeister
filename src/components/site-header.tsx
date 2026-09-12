@@ -23,7 +23,7 @@ export async function SiteHeader() {
           <span>{t('common.appName')}</span>
         </Link>
 
-        <nav className="ms-auto flex items-center gap-2 text-sm" aria-label={t('nav.home')}>
+        <nav className="ms-auto flex items-center gap-2 text-sm" aria-label={t('nav.mainNavigation')}>
           {/*
             LocaleSwitcher reads the query string, so it needs a Suspense
             boundary to keep the surrounding pages statically prerenderable.

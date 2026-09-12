@@ -63,7 +63,8 @@ cookies, the search API rejects invalid input).
 | Script | What it guarantees |
 | --- | --- |
 | `e2e/public.mjs` | The parent journey leaves the cookie jar empty and contacts no third party until the map is explicitly activated; search filters produce shareable URLs; the `.ics` export is a valid single-event VCALENDAR |
-| `e2e/a11y.mjs` | 41 page states have no WCAG 2.1 A/AA violations - every public page in five locales, the activated map, form error states, and the admin pages |
+| `e2e/a11y.mjs` | 41 page states have no WCAG 2.1 A/AA or best-practice violations - every public page in five locales, the activated map, form error states, and the admin pages |
+| `e2e/a11y-tree.mjs` | What assistive technology is handed: no two identically named links leading elsewhere, the result count is both a heading and an announcement, map markers name their school, form errors are programmatically tied to their field |
 | `e2e/a11y-manual.mjs` | Reflow at 320 px, 200 % text enlargement, keyboard-only operation, focus visibility, heading structure |
 | `e2e/admin.mjs` | Profile and event CRUD, server-side validation, unpublished events stay off public pages, another school's event is indistinguishable from a missing one, and the audit trail records readable actions with the acting account |
 
@@ -134,13 +135,16 @@ data on every school page so open house dates can appear as rich results. Set
 
 ## Accessibility
 
-Audited against WCAG 2.1 AA: **41 page states, 0 axe-core violations**, across
-every public page in all five locales, the activated map, form error states and
-the admin pages. Reflow at 320 px, 200 % text enlargement, keyboard-only
-operation, focus visibility and heading structure were checked manually. The
-audit found and fixed four real defects, including a success badge at 3.91:1 and
-a `body { font-size: 16px }` rule that overrode the reader's own font-size
-setting.
+Audited against WCAG 2.1 AA plus axe's best-practice rules: **41 page states, 0
+violations**, across every public page in all five locales, the activated map,
+form error states and the admin pages. Reflow at 320 px, 200 % text enlargement,
+keyboard-only operation and focus visibility were checked manually, and the
+accessibility tree Chromium hands to assistive technology is audited separately.
+
+Seven real defects found and fixed, among them a success badge at 3.91:1, a
+`body { font-size: 16px }` rule that overrode the reader's own font-size setting,
+sign-in pages with no `h1`, and a `role="status"` that had silently removed the
+results heading from heading navigation.
 
 Contrast is guarded twice: `tests/contrast.test.ts` parses the oklch tokens out
 of `globals.css` and asserts 4.5:1 for all 17 text/surface pairs in both themes

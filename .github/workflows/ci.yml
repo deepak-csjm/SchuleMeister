@@ -222,6 +222,9 @@ jobs:
       - name: Accessibility criteria that axe cannot test
         run: node e2e/a11y-manual.mjs
 
+      - name: Accessibility tree (names, announcements, error association)
+        run: node e2e/a11y-tree.mjs
+
       - name: Staff journey (CRUD, validation, tenant isolation, audit trail)
         run: |
           # Warm the admin routes, then sign in the way a magic link would.
@@ -235,6 +238,7 @@ jobs:
         run: |
           SESSION=$(node e2e/get-session.mjs sekretariat@example.org)
           node e2e/a11y.mjs "" "$SESSION"
+          node e2e/a11y-tree.mjs "$SESSION"
 
       - name: Server log on failure
         if: failure()

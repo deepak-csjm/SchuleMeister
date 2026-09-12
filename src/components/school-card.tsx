@@ -73,7 +73,19 @@ export function SchoolCard({ school }: { school: SchoolListItem }) {
         {/* The label must be allowed to wrap: at 200% text size a nowrap
             button is wider than its card. */}
         <Button asChild variant="outline" size="sm" className="h-auto whitespace-normal py-2">
-          <Link href={`/schools/${school.id}`}>{t('openDetails')}</Link>
+          {/*
+            Every card would otherwise contribute an identically named link, so
+            a screen reader's link list reads "view details" a dozen times with
+            no way to tell the schools apart (WCAG 2.4.4). The visible text stays
+            the first part of the accessible name, which keeps voice control
+            working (WCAG 2.5.3 Label in Name).
+          */}
+          <Link
+            href={`/schools/${school.id}`}
+            aria-label={`${t('openDetails')}: ${school.name}`}
+          >
+            {t('openDetails')}
+          </Link>
         </Button>
       </CardFooter>
     </Card>

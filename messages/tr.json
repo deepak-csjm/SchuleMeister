@@ -25,7 +25,9 @@
     "privacy": "Veri koruma",
     "skipToContent": "İçeriğe geç",
     "imprint": "Künye",
-    "accessibility": "Erişilebilirlik"
+    "accessibility": "Erişilebilirlik",
+    "mainNavigation": "Ana menü",
+    "legalNavigation": "Yasal bilgiler"
   },
   "locale": {
     "label": "Dil",
