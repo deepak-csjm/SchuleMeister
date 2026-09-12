@@ -39,6 +39,13 @@ section('school profile');
 await page.goto(`${BASE}/admin/profile`, { waitUntil: 'networkidle' });
 checkEqual('the profile editor loads', await page.locator('h2').first().textContent(), 'Schulprofil bearbeiten');
 
+// Remember the original values so the run leaves the demo data as it found it.
+const original = {
+  headmaster: await page.inputValue('#headmaster'),
+  languages: await page.inputValue('#languages'),
+  postalCode: await page.inputValue('#postalCode'),
+};
+
 const headmaster = `E2E Leitung ${Date.now()}`;
 await page.fill('#headmaster', headmaster);
 await page.fill('#languages', 'Englisch, Niederländisch');
@@ -131,6 +138,18 @@ await page.waitForFunction(
   { timeout: 20000 },
 );
 checkEqual('the event is removed', await page.locator('section ul > li').count(), countBeforeDelete - 1);
+
+section('cleanup');
+// Restore the profile fields this run changed, so repeated local runs do not
+// leave test values on the public school page.
+await page.goto(`${BASE}/admin/profile`, { waitUntil: 'networkidle' });
+await page.fill('#headmaster', original.headmaster);
+await page.fill('#languages', original.languages);
+await page.fill('#postalCode', original.postalCode);
+await submitFormWith('#name');
+await page.waitForSelector('form:has(#name) [role=status]', { timeout: 20000 });
+await page.reload({ waitUntil: 'networkidle' });
+checkEqual('the profile was restored', await page.inputValue('#headmaster'), original.headmaster);
 
 checkEqual('no uncaught page errors', pageErrors.join(' | ') || 'none', 'none');
 
