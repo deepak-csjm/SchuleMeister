@@ -123,3 +123,119 @@ jobs:
           code=$(curl -s -o /dev/null -w '%{http_code}' 'http://localhost:3000/api/schools?radius=9999')
           echo "invalid radius -> $code"
           [ "$code" = "400" ] || exit 1
+
+  e2e:
+    name: Browser flows and accessibility
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: schulkompass_e2e
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/schulkompass_e2e?schema=public
+      # get-session.mjs mixes this into the token hash, so the script and the
+      # server must agree on it.
+      AUTH_SECRET: ci-placeholder-secret-value-0000000000
+      AUTH_URL: http://localhost:3000
+      SITE_URL: http://localhost:3000
+      ALLOWED_ADMIN_EMAIL_DOMAINS: example.org
+      EMAIL_FROM: SchulKompass CI <noreply@example.org>
+      BASE_URL: http://localhost:3000
+      NEXT_TELEMETRY_DISABLED: '1'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cache the Playwright browser
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright-core install --with-deps chromium
+
+      - name: Install Chromium system dependencies
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright-core install-deps chromium
+
+      - name: Prepare the database
+        run: |
+          npx prisma migrate deploy
+          npm run db:seed
+
+      - name: Start the application
+        # Development mode on purpose: the production session cookie carries the
+        # __Secure- prefix and the Secure attribute, so it cannot survive plain
+        # http://, and the admin flows need a session. The production build is
+        # covered by the smoke test in the `verify` job.
+        run: |
+          npm run dev > /tmp/server.log 2>&1 &
+          echo "SERVER_PID=$!" >> "$GITHUB_ENV"
+          for _ in $(seq 1 60); do
+            if curl -fsS http://localhost:3000/api/health > /dev/null; then break; fi
+            sleep 2
+          done
+          curl -fsS http://localhost:3000/api/health
+
+      - name: Warm the routes
+        # `next dev` compiles on first request; warming the routes keeps the
+        # first navigation in each script inside its timeout.
+        run: |
+          for path in / /en /tr /uk /ar /privacy /imprint /accessibility /signin \
+                      /api/schools /robots.txt /sitemap.xml; do
+            curl -fsS -o /dev/null "http://localhost:3000$path" || exit 1
+          done
+          school=$(curl -fsS 'http://localhost:3000/api/schools?limit=1' | node -e \
+            "let d='';process.stdin.on('data',c=>d+=c).on('end',()=>process.stdout.write(JSON.parse(d).schools[0].id))")
+          curl -fsS -o /dev/null "http://localhost:3000/schools/$school"
+
+      - name: Parent journey (privacy guarantees, search, calendar export)
+        run: node e2e/public.mjs
+
+      - name: Accessibility audit of the public pages (WCAG 2.1 A/AA)
+        run: node e2e/a11y.mjs
+
+      - name: Accessibility criteria that axe cannot test
+        run: node e2e/a11y-manual.mjs
+
+      - name: Staff journey (CRUD, validation, tenant isolation, audit trail)
+        run: |
+          # Warm the admin routes, then sign in the way a magic link would.
+          SESSION=$(node e2e/get-session.mjs sekretariat@example.org)
+          for path in /admin /admin/profile /admin/events; do
+            curl -fsS -o /dev/null -b "schulkompass.session=$SESSION" "http://localhost:3000$path"
+          done
+          node e2e/admin.mjs "$SESSION"
+
+      - name: Accessibility audit including the admin pages
+        run: |
+          SESSION=$(node e2e/get-session.mjs sekretariat@example.org)
+          node e2e/a11y.mjs "" "$SESSION"
+
+      - name: Server log on failure
+        if: failure()
+        run: tail -100 /tmp/server.log

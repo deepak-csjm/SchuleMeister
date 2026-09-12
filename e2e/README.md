@@ -1,12 +1,18 @@
-# Manual browser verification
+# Browser flows and accessibility audit
 
-These scripts are **not part of `npm test`**. They need a running dev server and a
-seeded database, so they are kept as reproducible manual checks rather than as a CI
-suite (see ARCHITECTURE.md, "Known limitations").
+These scripts run in CI (`.github/workflows/ci.yml`, job `e2e`) on every push.
+They are not part of `npm test`, because they need Chromium, a running server and
+a seeded database.
 
-They were used to verify the behaviour that unit tests cannot reach: the magic-link
-flow, the admin CRUD path, tenant isolation, and the claim that the public pages set
-no cookies and make no third-party requests.
+They cover what unit tests cannot reach: the magic-link flow, the admin CRUD
+path, tenant isolation, the WCAG 2.1 AA audit, and the claim that the public
+pages set no cookies and make no third-party requests until the visitor
+activates the map.
+
+Every script asserts through `_harness.mjs` and **exits non-zero on failure**, so
+a regression fails the build rather than scrolling past in a log. Fixtures (a
+school id, a school with an upcoming event) are discovered through
+`/api/schools`, so the scripts need no database credentials of their own.
 
 ## Setup
 
@@ -84,7 +90,11 @@ outstanding and is declared as such in the accessibility statement.
 
 ## What to expect
 
-Both scripts print a numbered log. Any thrown timeout means a step regressed - the
-step number tells you which. The scripts use IDs (`#q`, `#title`, `#postalCode`, ...);
-form submits are scoped with `form:has(#field)` because the admin layout renders its
-sign-out form before the page content.
+Each script prints one line per check and a summary, then exits 0 or 1. The
+scripts select by id (`#q`, `#title`, `#postalCode`, ...); form submits are scoped
+with `form:has(#field)` because the admin layout renders its sign-out form before
+the page content.
+
+A development server is required rather than optional: the production session
+cookie carries the `__Secure-` prefix and the `Secure` attribute, so it cannot be
+set over plain `http://` and the admin scripts would have no session.

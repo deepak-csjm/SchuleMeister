@@ -34,7 +34,9 @@ Manually, for the criteria axe cannot evaluate (`e2e/a11y-manual.mjs`):
 | 1.3.1 Structure | Exactly one `h1` per page, no skipped heading levels, one `main` |
 | 3.1.1 Language of page | `lang` and `dir` are set per locale (`dir="rtl"` for Arabic) |
 
-Re-run both scripts after UI changes - see [`e2e/README.md`](../e2e/README.md).
+Both scripts run in CI on every push (`.github/workflows/ci.yml`, job `e2e`) and
+exit non-zero on any violation. To run them locally, see
+[`e2e/README.md`](../e2e/README.md).
 
 ## What the audit found and fixed
 
@@ -92,5 +94,6 @@ much:
   school pages, and the map loads only after explicit consent.
 - **School-authored text.** Descriptions and admission notes are written by
   school staff; their clarity and structure are outside the operator's control.
-- **Not wired into CI.** The browser audit needs Chromium and a seeded database.
-  The contrast test is in `npm test`; the axe sweep is a manual pre-release step.
+- **The audit runs against a development server in CI**, because the production
+  session cookie is `Secure` and the admin pages need a session. The rendered
+  markup is the same; the difference is the dev-only `'unsafe-eval'` in the CSP.

@@ -18,7 +18,7 @@ makes no third-party requests.
 | Styling | Tailwind CSS v4 + shadcn-style components, Lucide icons |
 | i18n | next-intl - German (default), English, Turkish, Ukrainian, Arabic (RTL) |
 | Maps | Leaflet + OpenStreetMap tiles, loaded only after explicit consent |
-| Tests | Vitest (201 unit tests) + CI smoke test + axe-core audit |
+| Tests | Vitest (201 unit tests) + browser flows and axe-core audit, all in CI |
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the reasoning behind these
 choices, including where the current implementation would need to change to scale
@@ -48,6 +48,28 @@ npm run dev              # http://localhost:3000
 The seed creates two demo staff accounts, `sekretariat@example.org` (SECRETARY) and
 `admin@example.org` (SUPER_ADMIN). With `AUTH_DEV_LOG_MAGIC_LINK="true"` the sign-in
 link is printed to the server console instead of being emailed.
+
+## What CI checks
+
+`.github/workflows/ci.yml` runs two jobs on every push:
+
+**verify** - typecheck, lint, 201 unit tests, a Prisma schema-vs-migrations drift
+check, the production build, and an HTTP smoke test against the production server
+(public pages answer 200, `/admin` redirects anonymously, public pages set no
+cookies, the search API rejects invalid input).
+
+**e2e** - the browser flows, asserted rather than eyeballed:
+
+| Script | What it guarantees |
+| --- | --- |
+| `e2e/public.mjs` | The parent journey leaves the cookie jar empty and contacts no third party until the map is explicitly activated; search filters produce shareable URLs; the `.ics` export is a valid single-event VCALENDAR |
+| `e2e/a11y.mjs` | 41 page states have no WCAG 2.1 A/AA violations - every public page in five locales, the activated map, form error states, and the admin pages |
+| `e2e/a11y-manual.mjs` | Reflow at 320 px, 200 % text enlargement, keyboard-only operation, focus visibility, heading structure |
+| `e2e/admin.mjs` | Profile and event CRUD, server-side validation, unpublished events stay off public pages, another school's event is indistinguishable from a missing one, and the audit trail records readable actions with the acting account |
+
+Each script exits non-zero on failure. Both regression guards were verified to
+actually fail: re-enabling the locale cookie fails the parent journey, and
+reverting the success colour token fails the accessibility audit.
 
 ## Scripts
 
@@ -120,10 +142,11 @@ audit found and fixed four real defects, including a success badge at 3.91:1 and
 a `body { font-size: 16px }` rule that overrode the reader's own font-size
 setting.
 
-Contrast is guarded by `tests/contrast.test.ts`, which parses the oklch tokens
-out of `globals.css` and asserts 4.5:1 for all 17 text/surface pairs in both
-themes - no browser needed. Method, findings and the remaining gaps (no
-screen-reader pass yet) are in [docs/ACCESSIBILITY.md](docs/ACCESSIBILITY.md).
+Contrast is guarded twice: `tests/contrast.test.ts` parses the oklch tokens out
+of `globals.css` and asserts 4.5:1 for all 17 text/surface pairs in both themes
+without a browser, and the axe sweep runs in CI on every push. Method, findings
+and the remaining gaps (no screen-reader pass yet) are in
+[docs/ACCESSIBILITY.md](docs/ACCESSIBILITY.md).
 
 ## Legal pages
 
@@ -171,9 +194,9 @@ Documented rather than hidden - see [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#
   instances. Back it with Redis before scaling out.
 - Passkeys are not implemented. Magic links are complete; the WebAuthn provider
   additionally needs database sessions and an `Authenticator` model.
-- CI covers typecheck, lint, unit tests, Prisma schema/migration drift, the build and
-  an HTTP smoke test. The full browser flows are scripted in [`e2e/`](e2e/README.md)
-  but run manually, as they need a seeded database and a magic link from the log.
+- The browser suite runs against a development server, because the production
+  session cookie is `Secure` and cannot survive plain `http://`. The production
+  build is covered separately by an HTTP smoke test.
 - `script-src` still permits `'unsafe-inline'`; see the linked reasoning above.
 - No screen-reader testing has been done - the largest remaining accessibility
   gap, and declared as such on `/accessibility`.

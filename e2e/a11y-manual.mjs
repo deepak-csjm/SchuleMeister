@@ -1,11 +1,9 @@
-import { chromium } from 'playwright-core';
+import { BASE, check, discoverFixtures, finish, launchBrowser } from './_harness.mjs';
 
-const BASE = process.env.BASE_URL ?? 'http://localhost:3100';
-const EXEC = process.env.CHROME_PATH ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
-const SCHOOL = process.argv[2];
+const SCHOOL = process.argv[2] || (await discoverFixtures()).schoolId;
 const problems = [];
 
-const browser = await chromium.launch({ executablePath: EXEC, args: ['--no-sandbox'] });
+const browser = await launchBrowser();
 
 // --- WCAG 1.4.10 Reflow: no horizontal scrolling at 320 CSS px ---
 console.log('=== reflow at 320px (WCAG 1.4.10) ===');
@@ -152,5 +150,11 @@ console.log('\n=== document structure ===');
 }
 
 await browser.close();
-console.log(`\n=== ${problems.length ? problems.length + ' problem(s)' : 'no problems found'} ===`);
-for (const p of problems) console.log(`  - ${p}`);
+
+console.log();
+check(
+  'reflow, text resize, keyboard operation and document structure',
+  problems.length === 0,
+  problems.length ? problems.join('; ') : 'all checks passed',
+);
+finish();

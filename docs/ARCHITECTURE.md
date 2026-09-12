@@ -134,12 +134,22 @@ publishing none.
 
 ### Accessibility is tested twice, at different costs
 
-The browser audit (`e2e/a11y.mjs`, axe-core over 41 page states) is thorough but
-needs Chromium and a seeded database, so it is a pre-release step. Colour
-contrast - the single most regression-prone part, and the one the audit actually
-caught - is additionally guarded by `tests/contrast.test.ts`, which parses the
-oklch tokens straight out of `globals.css` and does the WCAG maths in Node. That
-runs with `npm test` in under a second.
+The browser audit (`e2e/a11y.mjs`, axe-core over 41 page states) runs in CI.
+Colour contrast - the single most regression-prone part, and the one the audit
+actually caught - is additionally guarded by `tests/contrast.test.ts`, which
+parses the oklch tokens straight out of `globals.css` and does the WCAG maths in
+Node. That runs with `npm test` in under a second, so a token nudged out of
+compliance fails before anyone waits for a browser.
+
+### The browser checks assert, they do not narrate
+
+The `e2e/` scripts began as things a human reads. Running in CI means each one
+records pass/fail through a shared harness (`e2e/_harness.mjs`) and exits
+non-zero, and fixtures are discovered through the public API rather than by
+querying the database, so the scripts need no database credentials. Both of the
+important guards were verified to fail on a real regression - re-enabling the
+locale cookie fails the parent journey, reverting `--success` fails the audit -
+because a green check that cannot go red is worse than no check.
 
 ### Times are stored as a date plus `"HH:mm"` text
 
@@ -192,19 +202,19 @@ These are real and deliberate, not oversights:
    magic links are complete. The Auth.js WebAuthn provider additionally requires
    database sessions and an `Authenticator` model, which conflicts with the current
    JWT strategy - a deliberate scope decision, not a stub.
-4. **No CI end-to-end suite.** CI runs typecheck, lint, unit tests, a Prisma
-   schema-vs-migrations drift check, the build and an HTTP smoke test (public pages
-   200, `/admin` redirects, no cookies on public pages, invalid API input rejected).
-   The full browser flows - auth, CRUD, tenant isolation, the cookie-free
-   journey, the WCAG audit - were verified in Chromium and the scripts are
-   checked in under `e2e/`, but they are not wired into CI because they need
-   Chromium and a seeded database.
+4. **The browser suite runs against a development server.** The production
+   session cookie carries the `__Secure-` prefix and the `Secure` attribute, so
+   it cannot survive plain `http://`, and the staff flows need a session. Serving
+   the production build over TLS in CI would be more faithful; for now the
+   production build is covered by a separate HTTP smoke test and the browser
+   flows run against `next dev`, with the routes warmed first so on-demand
+   compilation does not eat the navigation timeouts.
 
-   Note on obtaining a session for such a run: the verification token cannot be
-   read back out of the database, because Auth.js stores
-   `sha256(token + AUTH_SECRET)`. `e2e/get-session.mjs` therefore seeds a row
-   whose preimage it generated and redeems it like a real magic link - no
-   dev-only flag, no SMTP server and no test hook in the production auth path.
+   Signing in without a backdoor: the verification token cannot be read back out
+   of the database, because Auth.js stores `sha256(token + AUTH_SECRET)`.
+   `e2e/get-session.mjs` therefore seeds a row whose preimage it generated and
+   redeems it like a real magic link - no dev-only flag, no SMTP server and no
+   test hook in the production auth path.
 5. **Audit diffs store values, not a signed chain.** Good enough to answer "who
    changed this and when"; it is not tamper-evident.
 6. **`script-src` still allows `'unsafe-inline'`.** Removing it requires per-request

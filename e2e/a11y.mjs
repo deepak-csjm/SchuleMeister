@@ -1,14 +1,12 @@
 import { readFileSync } from 'node:fs';
-import { chromium } from 'playwright-core';
+import { BASE, check, discoverFixtures, finish, launchBrowser } from './_harness.mjs';
 
-const BASE = process.env.BASE_URL ?? 'http://localhost:3100';
-const EXEC = process.env.CHROME_PATH ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
 const AXE = readFileSync(
   process.env.AXE_PATH ?? 'node_modules/axe-core/axe.min.js',
   'utf8',
 );
-const SCHOOL = process.argv[2];
 const SESSION = process.argv[3];
+const SCHOOL = process.argv[2] || (await discoverFixtures()).schoolId;
 
 // WCAG 2.1 A + AA, which is what BITV 2.0 / the EU directive require.
 const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'];
@@ -37,7 +35,7 @@ const ADMIN_PAGES = [
   { name: 'admin-events', path: '/admin/events' },
 ];
 
-const browser = await chromium.launch({ executablePath: EXEC, args: ['--no-sandbox'] });
+const browser = await launchBrowser();
 const findings = [];
 let checks = 0;
 
@@ -135,9 +133,8 @@ if (SESSION) {
 await browser.close();
 
 console.log(`\n=== ${checks} page states audited against ${TAGS.join(', ')} ===`);
-if (findings.length === 0) {
-  console.log('No WCAG 2.1 A/AA violations found.');
-} else {
+check(`${checks} page states have no WCAG 2.1 A/AA violations`, findings.length === 0, `${findings.length} violation instance(s)`);
+if (findings.length > 0) {
   const byRule = new Map();
   for (const f of findings) {
     const key = `${f.id} (${f.impact})`;
@@ -154,3 +151,5 @@ if (findings.length === 0) {
     console.log();
   }
 }
+
+finish();

@@ -1,68 +1,90 @@
-import { chromium } from 'playwright-core';
+/**
+ * The parent journey, asserted end to end.
+ *
+ * The privacy guarantees are the point of this script: a full journey must
+ * leave the cookie jar empty and must not contact any third party until the
+ * visitor explicitly activates the map.
+ */
+import { BASE, check, checkEqual, discoverFixtures, finish, launchBrowser, section } from './_harness.mjs';
 
-const BASE = process.env.BASE_URL ?? 'http://localhost:3101';
-const EXEC = process.env.CHROME_PATH ?? '/opt/pw-browsers/chromium-1194/chrome-linux/chrome';
-const log = (...a) => console.log(...a);
-
-const browser = await chromium.launch({ executablePath: EXEC, args: ['--no-sandbox'] });
+const { schoolWithEventId, schoolCount } = await discoverFixtures();
+const browser = await launchBrowser();
 const context = await browser.newContext({ locale: 'de-DE' });
 const page = await context.newPage();
-page.on('pageerror', (e) => log('PAGE ERROR:', e.message));
 
-// Record every third-party request to prove the map is not loaded unprompted.
-const external = [];
-page.on('request', (r) => {
-  const host = new URL(r.url()).host;
-  if (!host.startsWith('localhost')) external.push(host);
+const pageErrors = [];
+page.on('pageerror', (error) => pageErrors.push(error.message));
+
+// Every request to a host other than the app itself, recorded from the start.
+const thirdParty = [];
+page.on('request', (request) => {
+  const { host } = new URL(request.url());
+  if (!BASE.includes(host)) thirdParty.push(host);
 });
 
+section('landing page');
 await page.goto(BASE, { waitUntil: 'networkidle' });
-log('1. heading:', await page.locator('h1').textContent());
-log('2. results:', (await page.locator('h2[role=status]').textContent()).trim());
-log('3. third-party requests before map consent:', [...new Set(external)]);
-log('4. cookies before consent:', (await context.cookies()).map((c) => c.name));
+check('heading is rendered', (await page.locator('h1').textContent())?.includes('Schule') ?? false);
+check(
+  'all seeded schools are listed',
+  (await page.locator('h2[role=status]').textContent())?.includes(String(schoolCount)) ?? false,
+  `${schoolCount} schools`,
+);
+checkEqual('no third-party request before map consent', [...new Set(thirdParty)].join(',') || 'none', 'none');
+checkEqual('no cookies set', (await context.cookies()).length, 0);
 
-// --- search by PLZ with filters ---
+section('search and filters');
 await page.fill('#q', '40213');
 await page.selectOption('#radius', '2');
 await page.check('#ogs');
 await page.locator('form button[type=submit]').first().click();
-await page.waitForURL(/\?/, { timeout: 20000 });
+await page.waitForURL(/q=40213/, { timeout: 20000 });
 await page.waitForLoadState('networkidle');
-log('5. url after search:', new URL(page.url()).search);
-log('6. results:', (await page.locator('h2[role=status]').textContent()).trim());
-log('7. near-label:', (await page.locator('h2[role=status] ~ p').textContent()).trim());
+const search = new URL(page.url()).search;
+check('filters are reflected in a shareable URL', search.includes('radius=2') && search.includes('ogs=true'), search);
+const resultCount = Number(/(\d+)/.exec((await page.locator('h2[role=status]').textContent()) ?? '')?.[1] ?? 0);
+check('the radius narrows the result set', resultCount > 0 && resultCount < schoolCount, `${resultCount} of ${schoolCount}`);
+check('the resolved location is shown', ((await page.locator('h2[role=status] ~ p').textContent()) ?? '').includes('40213'));
 
-// --- map consent gate ---
-const loadMapButton = page.getByRole('button', { name: 'Karte laden' });
-log('8. map gated behind a button:', await loadMapButton.isVisible());
-await loadMapButton.click();
+section('map consent gate');
+const loadMap = page.getByRole('button', { name: 'Karte laden' });
+check('the map is behind an explicit opt-in', await loadMap.isVisible());
+checkEqual('still no third-party request', [...new Set(thirdParty)].join(',') || 'none', 'none');
+await loadMap.click();
+await page.waitForSelector('.leaflet-container', { timeout: 20000 });
 await page.waitForTimeout(2500);
-log('9. tile host contacted after consent:', [...new Set(external)]);
-log('10. leaflet container rendered:', await page.locator('.leaflet-container').isVisible());
+check('tiles are requested only after consent', thirdParty.some((host) => host.endsWith('tile.openstreetmap.org')), [...new Set(thirdParty)].join(', '));
+check('the map renders', await page.locator('.leaflet-container').isVisible());
 
-// --- locale switch keeps the query ---
+section('locale switching');
 await page.locator('header select').selectOption('ar');
 await page.waitForURL(/\/ar/, { timeout: 20000 });
-log('11. locale switch ->', new URL(page.url()).pathname + new URL(page.url()).search);
-log('12. dir:', await page.locator('html').getAttribute('dir'));
-log('13. heading (ar):', await page.locator('h1').textContent());
+const arabic = new URL(page.url());
+check('the query survives a locale change', arabic.search.includes('q=40213'), arabic.pathname + arabic.search);
+checkEqual('Arabic renders right-to-left', await page.locator('html').getAttribute('dir'), 'rtl');
 
-// --- school detail + ics link ---
-// Pick a school that actually has an upcoming date, so the calendar link exists.
-await page.goto(`${BASE}/?openHouse=true`, { waitUntil: 'networkidle' });
-await page.locator('h2 a').first().click();
-await page.waitForURL(/\/schools\//, { timeout: 20000 });
-log('14. detail heading:', await page.locator('h1').textContent());
-
+section('school detail and calendar export');
+await page.goto(`${BASE}/schools/${schoolWithEventId}`, { waitUntil: 'networkidle' });
+check('the school page renders', ((await page.locator('h1').textContent()) ?? '').length > 0);
 const icsHref = await page.locator('a[href*="/ics"]').first().getAttribute('href');
-log('15. ics link:', icsHref);
+check('an "add to calendar" link is present', Boolean(icsHref), icsHref ?? 'missing');
 
-const response = await page.request.get(BASE + icsHref);
-const body = await response.text();
-log('16. ics status/type:', response.status(), response.headers()['content-type']);
-log('17. ics disposition:', response.headers()['content-disposition']);
-log('18. ics head:', body.split('\r\n').slice(0, 3).join(' | '));
+const ics = await page.request.get(BASE + icsHref);
+checkEqual('the .ics route answers 200', ics.status(), 200);
+check('it is served as a calendar', (ics.headers()['content-type'] ?? '').startsWith('text/calendar'));
+check('it is served as a download', (ics.headers()['content-disposition'] ?? '').includes('attachment'));
+const body = await ics.text();
+check('the payload is a valid VCALENDAR', body.startsWith('BEGIN:VCALENDAR\r\n') && body.trimEnd().endsWith('END:VCALENDAR'));
+check('it contains exactly one event', (body.match(/BEGIN:VEVENT/g) ?? []).length === 1);
 
-log('19. cookies at the end of the whole parent journey:', (await context.cookies()).map((c) => c.name));
+section('end of journey');
+checkEqual('the cookie jar is still empty', (await context.cookies()).map((c) => c.name).join(',') || 'empty', 'empty');
+checkEqual(
+  'only the app and the tile service were contacted',
+  [...new Set(thirdParty)].filter((host) => !host.endsWith('tile.openstreetmap.org')).join(',') || 'none',
+  'none',
+);
+checkEqual('no uncaught page errors', pageErrors.join(' | ') || 'none', 'none');
+
 await browser.close();
+finish();
