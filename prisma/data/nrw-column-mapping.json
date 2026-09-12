@@ -1,0 +1,23 @@
+{
+  "_comment": [
+    "Maps columns of the public NRW school directory (Schulverzeichnis, open.nrw)",
+    "onto the fields of the School model. Each entry lists accepted source column",
+    "names, checked case-insensitively in order.",
+    "IMPORTANT: the published column names have changed between dataset releases.",
+    "Verify this mapping against the file you are importing - `prisma/seed.ts`",
+    "fails with the list of columns it actually found when a required field is",
+    "missing."
+  ],
+  "officialCode": ["Schulnummer", "schulnummer", "SNR", "schul_nr"],
+  "name": ["Schulname", "Name", "Bezeichnung", "schulbezeichnung"],
+  "type": ["Schulform", "Schulform_Kurz", "SF", "schulform_bezeichnung"],
+  "address": ["Strasse", "Straße", "Strasse_Hausnummer", "adresse"],
+  "postalCode": ["PLZ", "Postleitzahl", "plz"],
+  "city": ["Ort", "Stadt", "ort"],
+  "latitude": ["Breitengrad", "Latitude", "lat", "geo_breite"],
+  "longitude": ["Laengengrad", "Längengrad", "Longitude", "lng", "geo_laenge"],
+  "phone": ["Telefon", "Telefonnummer", "tel"],
+  "email": ["E-Mail", "EMail", "Email", "email"],
+  "website": ["Internet", "Homepage", "Website", "www"],
+  "hasOGS": ["OGS", "Offene_Ganztagsschule", "ganztag"]
+}

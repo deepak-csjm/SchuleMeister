@@ -1,0 +1,167 @@
+// SchulKompass NRW - data model
+//
+// Design notes:
+// - The public parent-facing side of the product stores NO personal data.
+//   Only school staff accounts exist in the `User` table (invite-only).
+// - Models marked "additive" are not part of the original specification but are
+//   required by the feature set (audit logging, magic-link tokens, PLZ lookup).
+//   See docs/ARCHITECTURE.md for the rationale.
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum SchoolType {
+  GRUNDSCHULE
+  HAUPTSCHULE
+  REALSCHULE
+  GYMNASIUM
+  GESAMTSCHULE
+  FOERDERSCHULE
+  BERUFSKOLLEG
+}
+
+enum Role {
+  SUPER_ADMIN
+  SECRETARY
+}
+
+/// Categories used to render and filter public school events.
+enum EventType {
+  OPEN_HOUSE // Tag der offenen Tuer
+  INFO_EVENING // Informationsabend
+  REGISTRATION // Anmeldezeitraum / Anmeldetag
+  OTHER
+}
+
+model School {
+  id           String     @id @default(cuid())
+  /// Official NRW school number (Schulnummer), unique per school.
+  officialCode String     @unique
+  name         String
+  type         SchoolType
+  address      String
+  city         String     @default("Düsseldorf")
+  postalCode   String
+  latitude     Float?
+  longitude    Float?
+  phone        String?
+  email        String?
+  website      String?
+  hasOGS       Boolean    @default(false)
+
+  // --- additive: required by the "School Profile Manager" and detail view ---
+  /// Name of the headmaster (Schulleitung).
+  headmaster        String?
+  /// Free-text description of the school profile.
+  description       String?
+  /// Language tracks / focus languages offered, e.g. ["Englisch", "Französisch"].
+  languages         String[] @default([])
+  /// Facilities and offerings, e.g. ["Mensa", "Sporthalle", "Barrierefrei"].
+  facilities        String[] @default([])
+  /// Notes about the admission/registration process shown to parents.
+  registrationNotes String?
+
+  updatedAt DateTime   @updatedAt
+  createdAt DateTime   @default(now())
+  users     User[]
+  events    Event[]
+  auditLogs AuditLog[]
+
+  @@index([postalCode])
+  @@index([city])
+  @@index([type])
+  @@index([latitude, longitude])
+}
+
+model User {
+  id       String @id @default(cuid())
+  email    String @unique
+  role     Role   @default(SECRETARY)
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  /// Set on first successful magic-link sign-in.
+  emailVerified DateTime?
+  /// Allows revoking access without deleting the audit trail.
+  isActive      Boolean    @default(true)
+  lastLoginAt   DateTime?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  auditLogs     AuditLog[]
+
+  @@index([schoolId])
+}
+
+model Event {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  eventDate   DateTime
+  /// Local start time in "HH:mm" (Europe/Berlin), kept as text so schools can
+  /// publish all-day entries such as registration windows without a time.
+  startTime   String?
+  endTime     String?
+  location    String?
+  eventType   EventType @default(OPEN_HOUSE)
+  /// Target grade / audience, e.g. "Klasse 4" or "Jahrgangsstufe 5".
+  targetGrade String?
+  /// Unpublished events are invisible to the public API.
+  isPublished Boolean   @default(true)
+
+  schoolId  String
+  school    School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([schoolId, eventDate])
+  @@index([eventDate])
+}
+
+/// additive: GDPR/DSGVO requirement - every content edit is attributable.
+model AuditLog {
+  id     String   @id @default(cuid())
+  action String
+  /// Entity type that was changed, e.g. "School" or "Event".
+  entity String
+  /// Primary key of the changed entity.
+  entityId String
+  /// Optional JSON diff of the change (no personal data of parents).
+  changes  Json?
+  /// Denormalised so the log survives user deletion.
+  actorEmail String
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  schoolId   String?
+  school     School?  @relation(fields: [schoolId], references: [id], onDelete: SetNull)
+  createdAt  DateTime @default(now())
+
+  @@index([schoolId, createdAt])
+  @@index([userId, createdAt])
+  @@index([entity, entityId])
+}
+
+/// additive: storage for Auth.js magic-link tokens (hashed by Auth.js core).
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@id([identifier, token])
+}
+
+/// additive: offline PLZ -> coordinate lookup so radius search needs no
+/// third-party geocoding request (privacy by design).
+model PostalCode {
+  code      String @id
+  city      String
+  latitude  Float
+  longitude Float
+
+  @@index([city])
+}
